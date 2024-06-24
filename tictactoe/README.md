@@ -1,70 +1,36 @@
-# Getting Started with Create React App
+## ゲームのルール説明
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+#### ゲーム概要
+このゲームは、2人対戦型のまるばつゲームの一種です。プレイヤーは交互に3種類の異なる丸（3重丸、2重丸、1重丸）を置いていき、縦、横、斜めのいずれかに自分の色の丸を3つ揃えることを目指します。
 
-## Available Scripts
+#### プレイ方法
+1. **プレイヤーとターン順**:
+    - 2人のプレイヤーが交互に手番を行います。
+    - 赤丸のプレイヤーが先攻、青丸のプレイヤーが後攻です。
 
-In the project directory, you can run:
+2. **丸の種類**:
+    - **3重丸**: 最初に置く丸で、大、中、小の3つの円が重なった見た目です。
+    - **2重丸**: 3重丸が変化したもので、中、小の2つの円が重なった見た目です。
+    - **1重丸**: 2重丸が変化したもので、小さな1つの円です。
 
-### `npm start`
+3. **丸を置く**:
+    - プレイヤーは自分の手番になったら、盤面の空いているマスに3重丸を置きます。
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+4. **丸の変化**:
+    - 新しく3重丸を置いたとき、すでに盤面にある同じ色の丸が次のように変化します。
+        - 3重丸は2重丸に変化します。
+        - 2重丸は1重丸に変化します。
+        - 1重丸は盤面から消えます。
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+5. **勝利条件**:
+    - 縦、横、斜めのいずれかに自分の色の丸が3つ揃えば、そのプレイヤーの勝利です。
+    - 丸の種類（3重丸、2重丸、1重丸）は問わず、3つ揃えば勝利となります。
 
-### `npm test`
+6. **リセット**:
+    - リセットボタンを押すと、ゲームは初期状態に戻ります。どちらのプレイヤーでもゲームをリセットすることができます。
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+#### 追加情報
+- このゲームは戦略性が高く、どのタイミングでどこに丸を置くかが重要です。
+- 既存の丸が変化するルールを活用し、相手の動きを読みながら進めましょう。
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+楽しんでプレイしてください！
