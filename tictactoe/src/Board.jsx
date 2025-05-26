@@ -11,11 +11,11 @@ const BoardContainer = styled.div`
 
 function Board({ squares, onClick }) {
   return (
-    <BoardContainer>
-      {squares.map((square, i) => (
-        <Square key={i} value={square} onClick={() => onClick(i)} />
-      ))}
-    </BoardContainer>
+      <BoardContainer>
+        {squares.map((square, i) => (
+            <Square key={i} value={square} onClick={() => onClick(i)} />
+        ))}
+      </BoardContainer>
   );
 }
 
