@@ -1,73 +1,65 @@
-import * as PIXI from 'pixi.js';
+import { Assets, Container, type Spritesheet, Ticker } from 'pixi.js';
 import { Enemy1 } from '../entities/Enemy1';
 
-export class TitleScene extends PIXI.Container {
-  private leftEnemy1: Enemy1;
-  private rightEnemy1: Enemy1;
+export class TitleScene extends Container {
   private onStart: () => void;
+  private leftEnemy?: Enemy1;
+  private rightEnemy?: Enemy1;
+  private tickerFn!: (ticker: Ticker) => void;
 
   constructor(onStart: () => void) {
     super();
     this.onStart = onStart;
 
-    // タイトルテキスト
-    const title = new PIXI.Text('Roboids', {
-      fontFamily: 'monospace',
-      fontSize: 64,
-      fill: 0xffffff,
-      fontWeight: 'bold',
-      align: 'center',
-    });
-    title.anchor.set(0.5);
-    title.x = 400;
-    title.y = 80;
-    this.addChild(title);
+    // 画面クリックでスタート
+    this.eventMode = 'static';
+    this.cursor = 'pointer';
+    this.on('pointerdown', () => this.onStart());
 
-    // ロボット生成
-    this.leftEnemy1 = new Enemy1();
-    this.leftEnemy1.x = 100;
-    this.leftEnemy1.y = 200;
-    this.addChild(this.leftEnemy1);
+    // キー入力でスタート
+    window.addEventListener('keydown', this.handleKeyDown);
 
-    this.rightEnemy1 = new Enemy1();
-    this.rightEnemy1.x = 700;
-    this.rightEnemy1.y = 200;
-    this.addChild(this.rightEnemy1);
-
-    // 背景クリック
-    const bg = new PIXI.Graphics();
-    bg.beginFill(0x000000);
-    bg.drawRect(0, 0, 800, 600);
-    bg.endFill();
-    bg.eventMode = 'static';
-    bg.cursor = 'pointer';
-    bg.on('pointerdown', () => this.onStart());
-    this.addChildAt(bg, 0);
-
-    // キー入力
-    window.addEventListener('keydown', this.onKeyDown);
-
-    // アニメーション
-    PIXI.Ticker.shared.add(this.animate, this);
+    // 非同期初期化
+    this.init();
   }
 
-  private animate = (ticker: PIXI.Ticker) => {
-    const t = performance.now() / 1000;
-    this.leftEnemy1.y = 200 + Math.sin(t * 2) * 30;
-    this.rightEnemy1.y = 200 + Math.cos(t * 2) * 30;
-    this.leftEnemy1.animateFilament(t);
-    this.rightEnemy1.animateFilament(t);
-  };
+  private async init() {
+    // Enemy1スプライトシートを読み込む
+    const spritesheet: Spritesheet = await Assets.load('/images/enemy1.json');
 
-  private onKeyDown = (e: KeyboardEvent) => {
+    // 左右にEnemy1を配置
+    this.leftEnemy = new Enemy1(spritesheet);
+    this.leftEnemy.x = 200;
+    this.leftEnemy.y = 300;
+    this.addChild(this.leftEnemy);
+
+    this.rightEnemy = new Enemy1(spritesheet);
+    this.rightEnemy.x = 600;
+    this.rightEnemy.y = 300;
+    this.addChild(this.rightEnemy);
+
+    // アニメーション用Ticker
+    this.tickerFn = (ticker: Ticker) => {
+      const t = performance.now() / 1000;
+      if (this.leftEnemy) {
+        this.leftEnemy.y = 300 + Math.sin(t * 2) * 40;
+      }
+      if (this.rightEnemy) {
+        this.rightEnemy.y = 300 + Math.cos(t * 2) * 40;
+      }
+    };
+    Ticker.shared.add(this.tickerFn, this);
+  }
+
+  private handleKeyDown = (e: KeyboardEvent) => {
     if (e.code === 'Space' || e.code === 'Enter') {
       this.onStart();
     }
   };
 
-  public destroy(options?: boolean | PIXI.DestroyOptions) {
-    window.removeEventListener('keydown', this.onKeyDown);
-    PIXI.Ticker.shared.remove(this.animate, this);
+  override destroy(options?: boolean | import('pixi.js').DestroyOptions) {
+    window.removeEventListener('keydown', this.handleKeyDown);
+    Ticker.shared.remove(this.tickerFn, this);
     super.destroy(options);
   }
 }

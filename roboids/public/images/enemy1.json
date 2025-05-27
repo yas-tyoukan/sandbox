@@ -1,0 +1,74 @@
+{
+  "frames": {
+    "enemy1_0.png": {
+      "frame": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_1.png": {
+      "frame": { "x": 27, "y": 0, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_2.png": {
+      "frame": { "x": 54, "y": 0, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_3.png": {
+      "frame": { "x": 81, "y": 0, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_4.png": {
+      "frame": { "x": 0, "y": 43, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_5.png": {
+      "frame": { "x": 27, "y": 43, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_6.png": {
+      "frame": { "x": 54, "y": 43, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_7.png": {
+      "frame": { "x": 81, "y": 43, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    },
+    "enemy1_8.png": {
+      "frame": { "x": 0, "y": 86, "w": 27, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 27, "h": 43 },
+      "sourceSize": { "w": 27, "h": 43 }
+    }
+  },
+  "meta": {
+    "app": "https://github.com/piskelapp/piskel/",
+    "version": "1.0",
+    "image": "enemy1.png",
+    "format": "RGBA8888",
+    "size": { "w": 108, "h": 129 }
+  }
+}
