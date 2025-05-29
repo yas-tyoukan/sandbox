@@ -1,13 +1,31 @@
 import { AnimatedSprite, type Spritesheet } from 'pixi.js';
 
 export class Enemy1 extends AnimatedSprite {
-  constructor(spritesheet: Spritesheet) {
-    // すべてのフレーム名を配列で取得
+  private leftBound: number;
+  private rightBound: number;
+  private speed = 2;
+  private direction = 1;
+
+  constructor(spritesheet: Spritesheet, leftBound: number, rightBound: number) {
+    // フレーム配列生成（Piskel出力形式に合わせて修正）
     const frameNames = Object.keys(spritesheet.textures);
     const textures = frameNames.map((name) => spritesheet.textures[name]);
-
     super(textures);
-    this.animationSpeed = 0.1;
+    this.leftBound = leftBound;
+    this.rightBound = rightBound;
+    this.animationSpeed = 0.8;
     this.play();
+  }
+
+  updateMove() {
+    this.x += this.speed * this.direction;
+    if (this.x < this.leftBound) {
+      this.x = this.leftBound;
+      this.direction = 1;
+    }
+    if (this.x > this.rightBound) {
+      this.x = this.rightBound;
+      this.direction = -1;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { Stage1Scene } from './scenes/Stage1Scene';
 import { TitleScene } from './scenes/TitleScene';
 
 async function main() {
@@ -24,9 +25,14 @@ async function main() {
       app.stage.removeChild(currentScene);
     }
     // 例: Stage1Sceneをここで生成してaddChild
-    // const stage1 = new Stage1Scene();
-    // app.stage.addChild(stage1);
-    alert('ステージ1開始！（ここにゲーム本編を実装）');
+    const stage1 = new Stage1Scene(onStageClear);
+    app.stage.addChild(stage1);
+  }
+
+  function onStageClear(level: number) {
+    // ステージクリア時の処理
+    // ここではタイトル画面に戻る
+    showTitle();
   }
 
   showTitle();

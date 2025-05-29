@@ -24,16 +24,13 @@ export class TitleScene extends Container {
   }
 
   private async init() {
-    // Enemy1スプライトシートを読み込む
-    const spritesheet: Spritesheet = await Assets.load('/images/enemy1.json');
-
-    // 左右にEnemy1を配置
-    this.leftEnemy = new Enemy1(spritesheet);
+    const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json'); // 左右にEnemy1を配置
+    this.leftEnemy = new Enemy1(enemySheet, 150, 650);
     this.leftEnemy.x = 200;
     this.leftEnemy.y = 300;
     this.addChild(this.leftEnemy);
 
-    this.rightEnemy = new Enemy1(spritesheet);
+    this.rightEnemy = new Enemy1(enemySheet, 450, 650);
     this.rightEnemy.x = 600;
     this.rightEnemy.y = 300;
     this.addChild(this.rightEnemy);
