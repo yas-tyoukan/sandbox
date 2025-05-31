@@ -6,14 +6,19 @@ export class Enemy1 extends AnimatedSprite {
   private speed = 2;
   private direction = 1;
 
-  constructor(spritesheet: Spritesheet, leftBound: number, rightBound: number) {
+  constructor(
+    spritesheet: Spritesheet,
+    leftBound: number,
+    rightBound: number,
+    animationSpeed = 0.8,
+  ) {
     // フレーム配列生成（Piskel出力形式に合わせて修正）
     const frameNames = Object.keys(spritesheet.textures);
     const textures = frameNames.map((name) => spritesheet.textures[name]);
     super(textures);
     this.leftBound = leftBound;
     this.rightBound = rightBound;
-    this.animationSpeed = 0.8;
+    this.animationSpeed = animationSpeed;
     this.play();
   }
 

@@ -1,4 +1,4 @@
-// src/scenes/Stage1Scene.ts
+// src/scenes/Stage2Scene.ts
 import { Assets, Graphics, type Spritesheet } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
@@ -7,7 +7,7 @@ import { Player } from '~/entities/Player';
 import { TeleportPad } from '~/entities/TeleportPad';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 
-export class Stage1Scene extends BaseStageScene {
+export class Stage2Scene extends BaseStageScene {
   protected async initStage() {
     // プラットフォーム設計
     const platformHeight = 12;
@@ -98,6 +98,12 @@ export class Stage1Scene extends BaseStageScene {
         left: margin + enemyMoveMargin,
         right: GAME_WIDTH - margin - enemyMoveMargin,
       }, // 最下段
+      {
+        x: GAME_WIDTH / 2 + 50,
+        y: platformYs[0] - 32,
+        left: margin + enemyMoveMargin,
+        right: GAME_WIDTH - margin - enemyMoveMargin,
+      }, // 最下段
     ];
     for (const pos of enemyPositions) {
       const enemy = new Enemy1(enemySheet, pos.left, pos.right);
@@ -109,6 +115,6 @@ export class Stage1Scene extends BaseStageScene {
   }
 
   protected getStageNumber(): number {
-    return 1;
+    return 2;
   }
 }

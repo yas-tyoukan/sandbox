@@ -1,10 +1,12 @@
 import * as PIXI from 'pixi.js';
+import { Stage2Scene } from '~/scenes/Stage2Scene';
+import { GAME_HEIGHT, GAME_WIDTH } from './constants/gameConfig';
 import { Stage1Scene } from './scenes/Stage1Scene';
 import { TitleScene } from './scenes/TitleScene';
 
 async function main() {
   const app = new PIXI.Application();
-  await app.init({ width: 800, height: 600, background: '#000000' });
+  await app.init({ width: GAME_WIDTH, height: GAME_HEIGHT, background: '#000000' });
   document.body.appendChild(app.canvas);
 
   let currentScene: PIXI.Container | null = null;
@@ -19,20 +21,30 @@ async function main() {
     currentScene = titleScene;
   }
 
-  function startGame() {
+  function startGame(level = 1, lives = 4) {
     if (currentScene) {
-      currentScene.destroy({ children: true });
       app.stage.removeChild(currentScene);
+      currentScene.destroy({ children: true });
+      currentScene = null;
     }
     // 例: Stage1Sceneをここで生成してaddChild
-    const stage1 = new Stage1Scene(onStageClear);
-    app.stage.addChild(stage1);
+    const stage = (() => {
+      switch (level) {
+        case 1:
+          return new Stage1Scene(onStageClear, startGame, lives);
+        case 2:
+          return new Stage2Scene(onStageClear, startGame, lives);
+        default:
+          throw new Error(`Unknown level: ${level}`);
+      }
+    })();
+    currentScene = stage;
+    app.stage.addChild(stage);
   }
 
-  function onStageClear(level: number) {
+  function onStageClear(level: number, lives: number) {
     // ステージクリア時の処理
-    // ここではタイトル画面に戻る
-    showTitle();
+    startGame(level + 1, lives);
   }
 
   showTitle();
