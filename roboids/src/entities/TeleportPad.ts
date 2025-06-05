@@ -1,33 +1,17 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Assets, Sprite } from 'pixi.js';
 
-export class TeleportPad extends Container {
-  public pairId: number;
+export class TeleportPad extends Sprite {
+  public pairId: number | undefined;
 
-  constructor(x: number, y: number, width: number, height: number, pairId: number) {
-    super();
-    this.pairId = pairId;
-    this.width = width;
-    this.height = height;
-
-    const g = new Graphics();
-    g.rect(0, 0, width, height);
-    g.fill(0x2222ff);
-    g.stroke({ width: 2, color: 0xffffff });
-    this.addChild(g);
-
-    const label = new Text({
-      text: 'TELEPORT',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 16,
-        fill: 0xffffff,
-      },
-    });
-    label.x = 8;
-    label.y = -20;
-    this.addChild(label);
-
-    this.x = x;
-    this.y = y;
+  // 非同期ファクトリメソッドで生成
+  static async create(x: number, y: number, pairId: number): Promise<TeleportPad> {
+    const texture = await Assets.load('/images/teleport-pad.png');
+    const pad = new TeleportPad(texture);
+    pad.x = x;
+    pad.y = y;
+    pad.pairId = pairId;
+    pad.anchor.set(0.5, 0); // 上端中央基準
+    pad.pivot.y = 3; // 必要ならピクセル単位で微調整
+    return pad;
   }
 }

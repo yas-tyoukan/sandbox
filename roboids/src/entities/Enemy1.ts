@@ -3,7 +3,7 @@ import { AnimatedSprite, type Spritesheet } from 'pixi.js';
 export class Enemy1 extends AnimatedSprite {
   private leftBound: number;
   private rightBound: number;
-  private speed = 2;
+  private speed = 4;
   private direction = 1;
 
   constructor(
