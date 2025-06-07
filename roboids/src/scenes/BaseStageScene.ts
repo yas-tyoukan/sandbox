@@ -19,7 +19,7 @@ export abstract class BaseStageScene extends Container {
   protected teleports: TeleportPad[] = [];
   protected goal!: PowerSquare;
   protected velocityY = 0;
-  protected onGround = false;
+  protected isPlayerOnGround = true;
   protected keys: Record<string, boolean> = {};
   protected prevKeys: Record<string, boolean> = {};
   protected platformYs: number[] = [];
@@ -32,6 +32,7 @@ export abstract class BaseStageScene extends Container {
   // 停止状態管理
   private pauseState: PauseState = 'none';
   private pauseTimer = 0; // フレーム単位（30fpsなら30で1秒）
+  private isTeleporting = false;
 
   constructor({
     startStage,
@@ -183,7 +184,7 @@ export abstract class BaseStageScene extends Container {
             this.restartStage();
           }
         } else if (this.pauseState === 'clear') {
-          this.startStage(this.getStageNumber(), this.lives);
+          this.startStage(this.getStageNumber() + 1, this.lives);
         }
         this.pauseState = 'none';
       }
@@ -212,9 +213,10 @@ export abstract class BaseStageScene extends Container {
     }
 
     // ジャンプ
-    if (this.keys['KeyW'] && this.onGround) {
+    const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
+    if (isJumpJustPressed && this.isPlayerOnGround) {
       this.velocityY = -7;
-      this.onGround = false;
+      this.isPlayerOnGround = false;
     }
 
     // 重力
@@ -222,14 +224,14 @@ export abstract class BaseStageScene extends Container {
     this.player.y += this.velocityY;
 
     // 床との当たり判定
-    this.onGround = false;
+    this.isPlayerOnGround = false;
     for (const p of this.platforms) {
       const playerHeightWithOffset = this.player.height / 2 + 4;
       const playerBottomY = this.player.y + playerHeightWithOffset;
       if (playerBottomY >= p.y && playerBottomY <= p.y + p.height) {
         this.player.y = p.y - playerHeightWithOffset;
         this.velocityY = 0;
-        this.onGround = true;
+        this.isPlayerOnGround = true;
       }
     }
 
@@ -237,16 +239,22 @@ export abstract class BaseStageScene extends Container {
     for (const tp of this.teleports) {
       const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
       if (
-        this.player.x + this.player.width > tp.x &&
-        this.player.x < tp.x + tp.width &&
-        this.player.y + this.player.height > tp.y &&
-        this.player.y < tp.y + tp.height &&
+        this.player.x < tp.x + tp.width / 2 &&
+        this.player.x > tp.x - tp.width / 2 &&
+        this.player.y < tp.y &&
+        this.player.y > tp.y - this.player.height &&
+        this.isPlayerOnGround &&
         isSpaceJustPressed
       ) {
         const pair = this.teleports.find((other) => other !== tp && other.pairId === tp.pairId);
         if (pair) {
-          this.player.x = pair.x + 8;
-          this.player.y = pair.y - this.player.height;
+          this.player.x = pair.x;
+          this.player.y = pair.y - this.player.height / 2;
+          this.isPlayerOnGround = true;
+          console.log(
+            `Teleported to pair ID: ${tp.pairId}, pair X: ${pair.x}, Y: ${pair.y}, this.player.y: ${this.player.y}, this.player.height: ${this.player.height}, this.player.x: ${this.player.x}`,
+          );
+          break;
         }
       }
     }

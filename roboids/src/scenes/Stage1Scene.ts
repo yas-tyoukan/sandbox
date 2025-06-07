@@ -1,7 +1,6 @@
 import { Assets, type Spritesheet } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { PowerSquare } from '~/entities/PowerSquare';
-import { TeleportPad } from '~/entities/TeleportPad';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 
 export class Stage1Scene extends BaseStageScene {
@@ -19,8 +18,9 @@ export class Stage1Scene extends BaseStageScene {
   }
   protected async initStage() {
     const margin = 60;
-    this.addTeleportPad(GAME_WIDTH - margin, 0, 1);
-    this.addTeleportPad(margin, 1, 1);
+    this.addTeleportPad(GAME_WIDTH - margin, 0, 0);
+    // this.addTeleportPad(100, 0, 0);
+    this.addTeleportPad(margin, 1, 0);
     this.addTeleportPad(GAME_WIDTH - margin, 1, 1);
     this.addTeleportPad(margin, 2, 1);
 
@@ -28,12 +28,12 @@ export class Stage1Scene extends BaseStageScene {
     const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
     const enemyMoveMargin = 80;
     const enemyPositions = [
-      {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[0] - 24,
-        left: 20 + enemyMoveMargin,
-        right: GAME_WIDTH - 20 - enemyMoveMargin,
-      }, // 最下段
+      // {
+      //   x: GAME_WIDTH / 2,
+      //   y: this.platformYs[0] - 24,
+      //   left: 20 + enemyMoveMargin,
+      //   right: GAME_WIDTH - 20 - enemyMoveMargin,
+      // }, // 最下段
       {
         x: GAME_WIDTH / 2,
         y: this.platformYs[1] - 24,
