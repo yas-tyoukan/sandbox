@@ -50,31 +50,30 @@ export class Stage2Scene extends BaseStageScene {
     // for (const pad of this.teleports) {
     //   this.addChild(pad);
     // }
-
     // Enemy1の配置（各段中央付近で左右移動）
-    const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
-    const enemyMoveMargin = 80;
-    const enemyPositions = [
-      {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[0] - 24,
-        left: 20 + enemyMoveMargin,
-        right: GAME_WIDTH - 20 - enemyMoveMargin,
-      }, // 最下段
-      {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[1] - 24,
-        left: 70 + enemyMoveMargin,
-        right: GAME_WIDTH - 80 - enemyMoveMargin,
-      }, // 中段
-      {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[2] - 24,
-        left: 20 + enemyMoveMargin,
-        right: GAME_WIDTH - 20 - enemyMoveMargin,
-      }, // 最上段
-    ];
-    this.addEnemies({ sheet: enemySheet, positions: enemyPositions });
+    // const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
+    // const enemyMoveMargin = 80;
+    // const enemyPositions = [
+    //   {
+    //     x: GAME_WIDTH / 2,
+    //     y: this.platformYs[0] - 24,
+    //     left: 20 + enemyMoveMargin,
+    //     right: GAME_WIDTH - 20 - enemyMoveMargin,
+    //   }, // 最下段
+    //   {
+    //     x: GAME_WIDTH / 2,
+    //     y: this.platformYs[1] - 24,
+    //     left: 70 + enemyMoveMargin,
+    //     right: GAME_WIDTH - 80 - enemyMoveMargin,
+    //   }, // 中段
+    //   {
+    //     x: GAME_WIDTH / 2,
+    //     y: this.platformYs[2] - 24,
+    //     left: 20 + enemyMoveMargin,
+    //     right: GAME_WIDTH - 20 - enemyMoveMargin,
+    //   }, // 最上段
+    // ];
+    // this.addEnemies({ sheet: enemySheet, positions: enemyPositions });
   }
 
   protected override getStageNumber(): number {

@@ -1,13 +1,15 @@
-import { Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
+import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Player } from '~/entities/Player';
 import type { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
+import { createTeleportingMasks } from '~/utils/createTeleportingMasks';
 
 type Platform = { x: number; y: number; width: number; height: number };
 
 type PauseState = 'none' | 'death' | 'clear';
+type Floor = 0 | 1 | 2; // 各段の床番号（0: 最下段, 1: 中段, 2: 最上段）
 
 export abstract class BaseStageScene extends Container {
   protected startStage: (level: number, lives: number) => void;
@@ -32,7 +34,10 @@ export abstract class BaseStageScene extends Container {
   // 停止状態管理
   private pauseState: PauseState = 'none';
   private pauseTimer = 0; // フレーム単位（30fpsなら30で1秒）
-  private isTeleporting = false;
+  private teleportingCount = 0;
+  private beforeTeleportPosition = { x: 0, y: 0 };
+  private currentPlayerMask: Graphics | null = null;
+  private teleportingPlayerMasks: Graphics[] = [];
 
   constructor({
     startStage,
@@ -50,7 +55,12 @@ export abstract class BaseStageScene extends Container {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     this.createStageBase();
-    Promise.all([this.initStage(), this.initPlayer(), this.initGoal()]).then(() => {
+    Promise.all([
+      this.initStage(),
+      this.initPlayer(),
+      this.initGoal(),
+      this.initTeleportingMasks(),
+    ]).then(() => {
       Ticker.shared.add(this.update, this);
     });
   }
@@ -60,6 +70,15 @@ export abstract class BaseStageScene extends Container {
   protected abstract initPlayer(): Promise<void>;
   protected abstract getStageNumber(): number;
   protected abstract initGoal(): Promise<void>;
+
+  private async initTeleportingMasks() {
+    // テレポート中のマスクを事前に生成
+    const masks = await createTeleportingMasks();
+    this.teleportingPlayerMasks = masks;
+    for (const mask of masks) {
+      // this.addChild(mask);
+    }
+  }
 
   private createStageBase() {
     // ステージの基本設計
@@ -163,8 +182,30 @@ export abstract class BaseStageScene extends Container {
   /**
    * 更新処理
    */
-  private update = () => {
+  private update = async () => {
     if (this.gameOverModal) return; // Game Over中は進行停止
+
+    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 2];
+    // @ts-ignore
+    // if (this.player.mask?.renderable) {
+    //   // @ts-ignore
+    //   this.player.mask.renderable = false; // 前のマスクを非表示にする
+    //   // @ts-ignore
+    //   this.removeChild(this.player.mask); // 前のマスクを削除
+    // }
+    // const masks = await createTeleportingMasks();
+    // const mask = masks[new Date().getSeconds() % 2];
+    mask.position.set(
+      this.player.x - this.player.width / 2,
+      this.player.y - this.player.height / 2,
+    );
+    if (this.player.mask) {
+      // @ts-ignore
+      this.player.mask.clear();
+    }
+    this.player.mask = mask;
+    this.addChild(mask);
+    mask.renderable = true;
 
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
@@ -192,12 +233,21 @@ export abstract class BaseStageScene extends Container {
       return;
     }
 
+    // ====== テレポート中の処理 ======
+    this.updateTeleporting();
+
     // ====== 通常時の進行 ======
 
     // プレイヤー左右移動
     const speed = 5;
-    if (this.keys['KeyA']) this.player.x -= speed;
-    if (this.keys['KeyD']) this.player.x += speed;
+    if (this.keys['KeyA']) {
+      this.resetTeleporting();
+      this.player.x -= speed;
+    }
+    if (this.keys['KeyD']) {
+      this.resetTeleporting();
+      this.player.x += speed;
+    }
     // 壁との当たり判定
     const anchorX = this.player.anchor?.x ?? 0.5; // デフォルト0.5（中心基準）
     const halfWidth = this.player.width * anchorX;
@@ -217,6 +267,7 @@ export abstract class BaseStageScene extends Container {
     if (isJumpJustPressed && this.isPlayerOnGround) {
       this.velocityY = -7;
       this.isPlayerOnGround = false;
+      this.resetTeleporting();
     }
 
     // 重力
@@ -239,8 +290,8 @@ export abstract class BaseStageScene extends Container {
     for (const tp of this.teleports) {
       const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
       if (
-        this.player.x < tp.x + tp.width / 2 &&
-        this.player.x > tp.x - tp.width / 2 &&
+        this.player.x + 8 / 2 < tp.x + tp.width / 2 &&
+        this.player.x - 8 / 2 > tp.x - tp.width / 2 &&
         this.player.y < tp.y &&
         this.player.y > tp.y - this.player.height &&
         this.isPlayerOnGround &&
@@ -248,12 +299,10 @@ export abstract class BaseStageScene extends Container {
       ) {
         const pair = this.teleports.find((other) => other !== tp && other.pairId === tp.pairId);
         if (pair) {
+          this.startTeleporting({ x: this.player.x, y: this.player.y });
           this.player.x = pair.x;
           this.player.y = pair.y - this.player.height / 2;
           this.isPlayerOnGround = true;
-          console.log(
-            `Teleported to pair ID: ${tp.pairId}, pair X: ${pair.x}, Y: ${pair.y}, this.player.y: ${this.player.y}, this.player.height: ${this.player.height}, this.player.x: ${this.player.x}`,
-          );
           break;
         }
       }
@@ -294,6 +343,7 @@ export abstract class BaseStageScene extends Container {
         this.updateStatusBar();
         this.pauseState = 'death';
         this.pauseTimer = 30;
+        this.resetTeleporting();
         return;
       }
     }
@@ -332,28 +382,61 @@ export abstract class BaseStageScene extends Container {
     this.addChild(this.player);
   }
 
-  protected addTeleportPad(x: number, floor: number, pairId: number) {
+  protected addTeleportPad(x: number, floor: Floor, pairId: number) {
     TeleportPad.create(x, this.platformYs[floor], pairId).then((pad) => {
       this.teleports.push(pad);
       this.addChild(pad);
     });
   }
 
-  protected addEnemies({
-    sheet,
-    positions,
-  }: {
-    sheet: Spritesheet;
-    positions: { left: number; right: number; x: number; y: number }[];
-  }) {
-    for (const pos of positions) {
-      const enemy = new Enemy1(sheet, pos.left, pos.right);
-      enemy.x = pos.x;
-      enemy.y = pos.y;
+  protected async addEnemies(
+    args: {
+      x: number;
+      floor: Floor;
+      bound: { left: number; right: number };
+      direction: number;
+    }[],
+  ) {
+    const sheet: Spritesheet = await Assets.load('/images/enemy1.json');
+    for (const { x, floor, bound, direction } of args) {
+      const enemy = new Enemy1(sheet, bound.left, bound.right, direction);
+      enemy.x = x;
+      enemy.y = this.platformYs[floor] - 24;
       enemy.anchor.set(0.5, 0.5);
       this.enemies.push(enemy);
       this.addChild(enemy);
     }
+  }
+  private startTeleporting({ x, y }: { x: number; y: number }) {
+    this.teleportingCount = 200;
+    this.beforeTeleportPosition = { x, y };
+  }
+
+  private async updateTeleporting() {
+    if (this.teleportingCount === 0) {
+      this.resetTeleporting();
+      return;
+    }
+    this.teleportingCount -= 1;
+    // this.resetTeleportingMask();
+    const restFrame = this.teleportingCount % 8;
+    const mask = this.teleportingPlayerMasks[0];
+    this.player.mask = mask;
+    mask.position.set(
+      this.player.x - this.player.width / 2,
+      this.player.y - this.player.height / 2,
+    );
+    this.currentPlayerMask = mask;
+  }
+
+  private resetTeleportingMask() {
+    this.player.mask = null;
+    this.currentPlayerMask = null;
+  }
+
+  private resetTeleporting() {
+    this.teleportingCount = 0;
+    this.resetTeleportingMask();
   }
 
   // Game Overモーダル表示

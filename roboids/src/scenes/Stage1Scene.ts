@@ -25,29 +25,35 @@ export class Stage1Scene extends BaseStageScene {
     this.addTeleportPad(margin, 2, 1);
 
     // Enemy1の配置（各段中央付近で左右移動）
-    const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
-    const enemyMoveMargin = 80;
-    const enemyPositions = [
+    this.addEnemies([
+      // {
+      //   x: 100,
+      //   floor: 0,
+      //   bound: {
+      //     left: 100,
+      //     right: GAME_WIDTH - 10,
+      //   },
+      //   direction: 1,
+      // }, // 最下段
       // {
       //   x: GAME_WIDTH / 2,
-      //   y: this.platformYs[0] - 24,
-      //   left: 20 + enemyMoveMargin,
-      //   right: GAME_WIDTH - 20 - enemyMoveMargin,
-      // }, // 最下段
+      //   floor: 1,
+      //   bound: {
+      //     left: 60,
+      //     right: GAME_WIDTH - 60,
+      //   },
+      //   direction: -1,
+      // }, // 中段
       {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[1] - 24,
-        left: 70 + enemyMoveMargin,
-        right: GAME_WIDTH - 80 - enemyMoveMargin,
-      }, // 中段
-      {
-        x: GAME_WIDTH / 2,
-        y: this.platformYs[2] - 24,
-        left: 20 + enemyMoveMargin,
-        right: GAME_WIDTH - 20 - enemyMoveMargin,
+        x: 50,
+        floor: 2,
+        bound: {
+          left: 60,
+          right: GAME_WIDTH - 120,
+        },
+        direction: 1,
       }, // 最上段
-    ];
-    this.addEnemies({ sheet: enemySheet, positions: enemyPositions });
+    ]);
   }
 
   protected override getStageNumber(): number {
