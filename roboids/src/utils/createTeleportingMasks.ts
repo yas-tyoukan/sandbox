@@ -12,11 +12,11 @@ export const createTeleportingMasks = async () => {
   for (let i = 0; i < r; i += 1) {
     const g = new Graphics();
     for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
+      for (let x = width; 0 < x; x--) {
         for (let j = 0; j < r; j++) {
           g.rect(x, y, 1, 1).fill({
-            color: 0xff0000,
-            alpha: (x + y * width) % 2 === i % 2 ? 1 : 0,
+            color: 0x000000,
+            alpha: (x + y * width + 1) % r < i ? 1 : 0,
           });
         }
       }

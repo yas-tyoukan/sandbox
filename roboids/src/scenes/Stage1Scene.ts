@@ -1,4 +1,3 @@
-import { Assets, type Spritesheet } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { PowerSquare } from '~/entities/PowerSquare';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
@@ -26,24 +25,24 @@ export class Stage1Scene extends BaseStageScene {
 
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemies([
-      // {
-      //   x: 100,
-      //   floor: 0,
-      //   bound: {
-      //     left: 100,
-      //     right: GAME_WIDTH - 10,
-      //   },
-      //   direction: 1,
-      // }, // 最下段
-      // {
-      //   x: GAME_WIDTH / 2,
-      //   floor: 1,
-      //   bound: {
-      //     left: 60,
-      //     right: GAME_WIDTH - 60,
-      //   },
-      //   direction: -1,
-      // }, // 中段
+      {
+        x: 100,
+        floor: 0,
+        bound: {
+          left: 100,
+          right: GAME_WIDTH - 10,
+        },
+        direction: 1,
+      }, // 最下段
+      {
+        x: GAME_WIDTH / 2,
+        floor: 1,
+        bound: {
+          left: 60,
+          right: GAME_WIDTH - 60,
+        },
+        direction: -1,
+      }, // 中段
       {
         x: 50,
         floor: 2,

@@ -1,6 +1,6 @@
 import { AnimatedSprite, type Spritesheet } from 'pixi.js';
 
-const speed = 4;
+const speed = 10;
 
 export class Enemy1 extends AnimatedSprite {
   private leftBound: number;

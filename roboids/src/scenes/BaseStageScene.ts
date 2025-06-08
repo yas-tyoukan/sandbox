@@ -34,10 +34,9 @@ export abstract class BaseStageScene extends Container {
   // 停止状態管理
   private pauseState: PauseState = 'none';
   private pauseTimer = 0; // フレーム単位（30fpsなら30で1秒）
-  private teleportingCount = 0;
-  private beforeTeleportPosition = { x: 0, y: 0 };
-  private currentPlayerMask: Graphics | null = null;
-  private teleportingPlayerMasks: Graphics[] = [];
+  private teleportingTimer = 0;
+  private beforeTeleportPlayer: Player | null = null;
+  private isTeleporting = false;
 
   constructor({
     startStage,
@@ -55,12 +54,7 @@ export abstract class BaseStageScene extends Container {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     this.createStageBase();
-    Promise.all([
-      this.initStage(),
-      this.initPlayer(),
-      this.initGoal(),
-      this.initTeleportingMasks(),
-    ]).then(() => {
+    Promise.all([this.initStage(), this.initPlayer(), this.initGoal()]).then(() => {
       Ticker.shared.add(this.update, this);
     });
   }
@@ -70,16 +64,6 @@ export abstract class BaseStageScene extends Container {
   protected abstract initPlayer(): Promise<void>;
   protected abstract getStageNumber(): number;
   protected abstract initGoal(): Promise<void>;
-
-  private async initTeleportingMasks() {
-    // テレポート中のマスクを事前に生成
-    const masks = await createTeleportingMasks();
-    this.teleportingPlayerMasks = masks;
-    for (const mask of masks) {
-      mask.visible = false;
-      this.addChild(mask);
-    }
-  }
 
   private createStageBase() {
     // ステージの基本設計
@@ -186,33 +170,6 @@ export abstract class BaseStageScene extends Container {
   private update = async () => {
     if (this.gameOverModal) return; // Game Over中は進行停止
 
-    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 8];
-    if (this.currentPlayerMask !== mask) {
-      // @ts-ignore
-      // if (this.player.mask?.renderable) {
-      //   // @ts-ignore
-      //   this.player.mask.renderable = false; // 前のマスクを非表示にする
-      //   // @ts-ignore
-      //   this.removeChild(this.player.mask); // 前のマスクを削除
-      // }
-      // const masks = await createTeleportingMasks();
-      // const mask = masks[new Date().getSeconds() % 2];
-      mask.position.set(
-        this.player.x - this.player.width / 2,
-        this.player.y - this.player.height / 2,
-      );
-      if (this.currentPlayerMask) {
-        // @ts-ignore
-        this.currentPlayerMask.visible = false;
-        // this.currentPlayerMask.clear();
-      }
-      // this.player.mask = null;
-      // this.player.mask = mask;
-      // mask.visible = true;
-      mask.visible = true;
-      this.currentPlayerMask = mask;
-    }
-
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
       this.pauseTimer--;
@@ -240,90 +197,91 @@ export abstract class BaseStageScene extends Container {
     }
 
     // ====== テレポート中の処理 ======
-    // this.updateTeleporting();
+    await this.updateTeleporting();
 
     // ====== 通常時の進行 ======
 
     // プレイヤー左右移動
-    const speed = 5;
-    if (this.keys['KeyA']) {
-      this.resetTeleporting();
-      this.player.x -= speed;
-    }
-    if (this.keys['KeyD']) {
-      this.resetTeleporting();
-      this.player.x += speed;
-    }
-    // 壁との当たり判定
-    const anchorX = this.player.anchor?.x ?? 0.5; // デフォルト0.5（中心基準）
-    const halfWidth = this.player.width * anchorX;
-    const rightHalfWidth = this.player.width * (1 - anchorX);
-    const offset = 8;
-    // 左端
-    if (this.player.x - halfWidth < offset) {
-      this.player.x = halfWidth + offset;
-    }
-    // 右端
-    if (this.player.x + rightHalfWidth > GAME_WIDTH - offset) {
-      this.player.x = GAME_WIDTH - rightHalfWidth - offset;
-    }
-
-    // ジャンプ
-    const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
-    if (isJumpJustPressed && this.isPlayerOnGround) {
-      this.velocityY = -7;
-      this.isPlayerOnGround = false;
-      this.resetTeleporting();
-    }
-
-    // 重力
-    this.velocityY += 0.45;
-    this.player.y += this.velocityY;
-
-    // 床との当たり判定
-    this.isPlayerOnGround = false;
-    for (const p of this.platforms) {
-      const playerHeightWithOffset = this.player.height / 2 + 4;
-      const playerBottomY = this.player.y + playerHeightWithOffset;
-      if (playerBottomY >= p.y && playerBottomY <= p.y + p.height) {
-        this.player.y = p.y - playerHeightWithOffset;
-        this.velocityY = 0;
-        this.isPlayerOnGround = true;
+    if (!this.isTeleporting) {
+      const speed = 8;
+      if (this.keys['KeyA']) {
+        this.player.x -= speed;
       }
-    }
+      if (this.keys['KeyD']) {
+        this.player.x += speed;
+      }
+      // 壁との当たり判定
+      const anchorX = this.player.anchor?.x ?? 0.5; // デフォルト0.5（中心基準）
+      const halfWidth = this.player.width * anchorX;
+      const rightHalfWidth = this.player.width * (1 - anchorX);
+      const offset = 8;
+      // 左端
+      if (this.player.x - halfWidth < offset) {
+        this.player.x = halfWidth + offset;
+      }
+      // 右端
+      if (this.player.x + rightHalfWidth > GAME_WIDTH - offset) {
+        this.player.x = GAME_WIDTH - rightHalfWidth - offset;
+      }
 
-    // TELEPORT判定
-    for (const tp of this.teleports) {
-      const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
-      if (
-        this.player.x + 8 / 2 < tp.x + tp.width / 2 &&
-        this.player.x - 8 / 2 > tp.x - tp.width / 2 &&
-        this.player.y < tp.y &&
-        this.player.y > tp.y - this.player.height &&
-        this.isPlayerOnGround &&
-        isSpaceJustPressed
-      ) {
-        const pair = this.teleports.find((other) => other !== tp && other.pairId === tp.pairId);
-        if (pair) {
-          this.startTeleporting({ x: this.player.x, y: this.player.y });
-          this.player.x = pair.x;
-          this.player.y = pair.y - this.player.height / 2;
+      // ジャンプ
+      const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
+      if (isJumpJustPressed && this.isPlayerOnGround) {
+        this.velocityY = -14;
+        this.isPlayerOnGround = false;
+        this.resetTeleporting();
+      }
+
+      // 重力
+      // TODO 重力で自然な計算ではなく、頭打ちがある。調整が必要
+      this.velocityY += 1.5;
+      this.player.y += this.velocityY;
+
+      // 床との当たり判定
+      this.isPlayerOnGround = false;
+      for (const p of this.platforms) {
+        const playerHeightWithOffset = this.player.height / 2 + 3;
+        const playerBottomY = this.player.y + playerHeightWithOffset;
+        if (playerBottomY >= p.y && playerBottomY <= p.y + p.height) {
+          this.player.y = p.y - playerHeightWithOffset;
+          this.velocityY = 0;
           this.isPlayerOnGround = true;
-          break;
         }
       }
-    }
 
-    // ゴール判定
-    if (
-      this.player.x + this.player.width > this.goal.x &&
-      this.player.x < this.goal.x + this.goal.width &&
-      this.player.y + this.player.height > this.goal.y &&
-      this.player.y < this.goal.y + this.goal.height
-    ) {
-      this.pauseState = 'clear';
-      this.pauseTimer = 30; // 30フレーム＝1秒（30fps時）
-      return;
+      // TELEPORT判定
+      for (const tp of this.teleports) {
+        const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
+        if (
+          this.player.x + 8 / 2 < tp.x + tp.width / 2 &&
+          this.player.x - 8 / 2 > tp.x - tp.width / 2 &&
+          this.player.y < tp.y &&
+          this.player.y > tp.y - this.player.height &&
+          this.isPlayerOnGround &&
+          isSpaceJustPressed
+        ) {
+          const pair = this.teleports.find((other) => other !== tp && other.pairId === tp.pairId);
+          if (pair) {
+            this.startTeleporting({ x: this.player.x, y: this.player.y });
+            this.player.x = pair.x;
+            this.player.y = pair.y - this.player.height / 2 - 4;
+            this.isPlayerOnGround = true;
+            break;
+          }
+        }
+      }
+
+      // ゴール判定
+      if (
+        this.player.x + this.player.width > this.goal.x &&
+        this.player.x < this.goal.x + this.goal.width &&
+        this.player.y + this.player.height > this.goal.y &&
+        this.player.y < this.goal.y + this.goal.height
+      ) {
+        this.pauseState = 'clear';
+        this.pauseTimer = 30; // 30フレーム＝1秒（30fps時）
+        return;
+      }
     }
 
     // 敵との当たり判定
@@ -366,17 +324,6 @@ export abstract class BaseStageScene extends Container {
     this.prevKeys = { ...this.keys };
   };
 
-  private handlePlayerDeath() {
-    this.lives--;
-    console.log(this.lives);
-    this.updateStatusBar();
-    if (this.lives === 0) {
-      this.showGameOver();
-    } else if (this.lives > 0) {
-      this.restartStage();
-    }
-  }
-
   // ステージを最初からやり直し(サブクラスで実装)
   protected abstract restartStage(): void;
 
@@ -413,36 +360,34 @@ export abstract class BaseStageScene extends Container {
       this.addChild(enemy);
     }
   }
-  private startTeleporting({ x, y }: { x: number; y: number }) {
-    this.teleportingCount = 200;
-    this.beforeTeleportPosition = { x, y };
+  private async startTeleporting({ x, y }: { x: number; y: number }) {
+    this.teleportingTimer = 20;
+    this.isTeleporting = true;
+    this.beforeTeleportPlayer = await Player.create();
+    this.beforeTeleportPlayer.x = x;
+    this.beforeTeleportPlayer.y = y;
+    this.beforeTeleportPlayer.anchor.set(0.5, 0.5);
+    this.beforeTeleportPlayer.fadeOut();
+    this.player.fadeIn();
+    this.addChild(this.beforeTeleportPlayer);
   }
 
   private async updateTeleporting() {
-    // if (this.teleportingCount === 0) {
-    //   this.resetTeleporting();
-    //   return;
-    // }
-    this.teleportingCount -= 1;
-    // this.resetTeleportingMask();
-    const restFrame = this.teleportingCount % 8;
-    const mask = this.teleportingPlayerMasks[0];
-    this.player.mask = mask;
-    mask.position.set(
-      this.player.x - this.player.width / 2,
-      this.player.y - this.player.height / 2,
-    );
-    this.currentPlayerMask = mask;
-  }
-
-  private resetTeleportingMask() {
-    this.player.mask = null;
-    this.currentPlayerMask = null;
+    if (!this.isTeleporting) return;
+    if (this.teleportingTimer === 0) {
+      this.resetTeleporting();
+      return;
+    }
+    this.teleportingTimer -= 1;
   }
 
   private resetTeleporting() {
-    this.teleportingCount = 0;
-    this.resetTeleportingMask();
+    this.isTeleporting = false;
+    this.teleportingTimer = 0;
+    if (this.beforeTeleportPlayer) {
+      this.beforeTeleportPlayer.destroy();
+      this.beforeTeleportPlayer = null;
+    }
   }
 
   // Game Overモーダル表示
