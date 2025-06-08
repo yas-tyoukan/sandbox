@@ -76,7 +76,8 @@ export abstract class BaseStageScene extends Container {
     const masks = await createTeleportingMasks();
     this.teleportingPlayerMasks = masks;
     for (const mask of masks) {
-      // this.addChild(mask);
+      mask.visible = false;
+      this.addChild(mask);
     }
   }
 
@@ -185,27 +186,32 @@ export abstract class BaseStageScene extends Container {
   private update = async () => {
     if (this.gameOverModal) return; // Game Over中は進行停止
 
-    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 2];
-    // @ts-ignore
-    // if (this.player.mask?.renderable) {
-    //   // @ts-ignore
-    //   this.player.mask.renderable = false; // 前のマスクを非表示にする
-    //   // @ts-ignore
-    //   this.removeChild(this.player.mask); // 前のマスクを削除
-    // }
-    // const masks = await createTeleportingMasks();
-    // const mask = masks[new Date().getSeconds() % 2];
-    mask.position.set(
-      this.player.x - this.player.width / 2,
-      this.player.y - this.player.height / 2,
-    );
-    if (this.player.mask) {
+    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 3];
+    if (this.currentPlayerMask !== mask) {
       // @ts-ignore
-      this.player.mask.clear();
+      // if (this.player.mask?.renderable) {
+      //   // @ts-ignore
+      //   this.player.mask.renderable = false; // 前のマスクを非表示にする
+      //   // @ts-ignore
+      //   this.removeChild(this.player.mask); // 前のマスクを削除
+      // }
+      // const masks = await createTeleportingMasks();
+      // const mask = masks[new Date().getSeconds() % 2];
+      mask.position.set(
+        this.player.x - this.player.width / 2,
+        this.player.y - this.player.height / 2,
+      );
+      if (this.currentPlayerMask) {
+        // @ts-ignore
+        this.currentPlayerMask.visible = false;
+        // this.currentPlayerMask.clear();
+      }
+      // this.player.mask = null;
+      // this.player.mask = mask;
+      // mask.visible = true;
+      mask.visible = true;
+      this.currentPlayerMask = mask;
     }
-    this.player.mask = mask;
-    this.addChild(mask);
-    mask.renderable = true;
 
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
@@ -234,7 +240,7 @@ export abstract class BaseStageScene extends Container {
     }
 
     // ====== テレポート中の処理 ======
-    this.updateTeleporting();
+    // this.updateTeleporting();
 
     // ====== 通常時の進行 ======
 
@@ -413,10 +419,10 @@ export abstract class BaseStageScene extends Container {
   }
 
   private async updateTeleporting() {
-    if (this.teleportingCount === 0) {
-      this.resetTeleporting();
-      return;
-    }
+    // if (this.teleportingCount === 0) {
+    //   this.resetTeleporting();
+    //   return;
+    // }
     this.teleportingCount -= 1;
     // this.resetTeleportingMask();
     const restFrame = this.teleportingCount % 8;

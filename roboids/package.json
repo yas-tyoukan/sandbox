@@ -16,7 +16,7 @@
   "description": "",
   "dependencies": {
     "pixi-filters": "^6.1.2",
-    "pixi.js": "^8.9.2"
+    "pixi.js": "^8.10.1"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

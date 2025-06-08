@@ -14,14 +14,14 @@ export const createTeleportingMasks = async () => {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         // for (let j = 0; j < r; j++) {
-        g.rect(x, y, 1, 1).fill({
-          color: 0xff0000,
-          alpha: (x + y * width) % 2 === i % 2 ? 1 : 0,
-        });
+        if (x % 3 === i % 3) {
+          g.rect(x, y, 1, 1).fill({
+            color: 0xff0000,
+          });
+        }
         // }
       }
     }
-    g.renderable = false;
     masks.push(g);
   }
   return masks;
