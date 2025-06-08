@@ -186,7 +186,7 @@ export abstract class BaseStageScene extends Container {
   private update = async () => {
     if (this.gameOverModal) return; // Game Over中は進行停止
 
-    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 3];
+    const mask = this.teleportingPlayerMasks[new Date().getSeconds() % 8];
     if (this.currentPlayerMask !== mask) {
       // @ts-ignore
       // if (this.player.mask?.renderable) {
