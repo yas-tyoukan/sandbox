@@ -1,5 +1,5 @@
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
-import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Player } from '~/entities/Player';
 import type { PowerSquare } from '~/entities/PowerSquare';
@@ -203,7 +203,7 @@ export abstract class BaseStageScene extends Container {
 
     // プレイヤー左右移動
     if (!this.isTeleporting) {
-      const speed = 8;
+      const speed = PLAYER_SPEED;
       if (this.keys['KeyA']) {
         this.player.x -= speed;
       }
@@ -227,15 +227,17 @@ export abstract class BaseStageScene extends Container {
       // ジャンプ
       const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
       if (isJumpJustPressed && this.isPlayerOnGround) {
-        this.velocityY = -14;
+        this.velocityY = -8;
         this.isPlayerOnGround = false;
         this.resetTeleporting();
       }
 
       // 重力
       // TODO 重力で自然な計算ではなく、頭打ちがある。調整が必要
-      this.velocityY += 1.5;
-      this.player.y += this.velocityY;
+      this.velocityY += 0.5;
+      if (Math.abs(this.velocityY) > 2) {
+        this.player.y += this.velocityY;
+      }
 
       // 床との当たり判定
       this.isPlayerOnGround = false;
@@ -264,7 +266,7 @@ export abstract class BaseStageScene extends Container {
           if (pair) {
             this.startTeleporting({ x: this.player.x, y: this.player.y });
             this.player.x = pair.x;
-            this.player.y = pair.y - this.player.height / 2 - 4;
+            this.player.y = pair.y - this.player.height / 2 - 3;
             this.isPlayerOnGround = true;
             break;
           }
