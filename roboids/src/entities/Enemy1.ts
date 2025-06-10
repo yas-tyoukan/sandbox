@@ -13,10 +13,11 @@ export class Enemy1 extends AnimatedSprite {
     const frameNames = Object.keys(spritSsheet.textures);
     const textures = frameNames.map((name) => spritSsheet.textures[name]);
     super(textures);
+    this.animationSpeed = 1;
+    this.play();
     this.leftBound = leftBound;
     this.rightBound = rightBound;
     this.direction = direction;
-    this.play();
   }
 
   updateMove() {

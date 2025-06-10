@@ -1,3 +1,4 @@
+import { Sound } from '@pixi/sound';
 import { DotFilter, GlitchFilter } from 'pixi-filters';
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
@@ -25,6 +26,11 @@ export class TitleScene extends Container {
 
     // 非同期初期化
     this.init();
+
+    Sound.from({
+      url: 'sounds/title.mp3',
+      autoPlay: true,
+    });
   }
 
   private async init() {
@@ -112,6 +118,7 @@ export class TitleScene extends Container {
     this.leftEnemy.anchor.set(0.5, 0.5);
     this.leftEnemy.x = boxX + 30;
     this.leftEnemy.y = boxY + 30;
+    this.leftEnemy.animationSpeed = 0.4;
     this.addChild(this.leftEnemy);
 
     // 右
@@ -119,6 +126,7 @@ export class TitleScene extends Container {
     this.rightEnemy.anchor.set(0.5, 0.5);
     this.rightEnemy.x = boxX + boxWidth - 30;
     this.rightEnemy.y = boxY + boxHeight - 30;
+    this.rightEnemy.animationSpeed = 0.4;
     this.addChild(this.rightEnemy);
 
     // アニメーション用Ticker

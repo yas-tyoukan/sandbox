@@ -1,15 +1,17 @@
+import { sound } from '@pixi/sound';
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Player } from '~/entities/Player';
 import type { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
-import { createTeleportingMasks } from '~/utils/createTeleportingMasks';
 
 type Platform = { x: number; y: number; width: number; height: number };
 
 type PauseState = 'none' | 'death' | 'clear';
 type Floor = 0 | 1 | 2; // 各段の床番号（0: 最下段, 1: 中段, 2: 最上段）
+
+sound.add('death', 'sounds/death.mp3');
 
 export abstract class BaseStageScene extends Container {
   protected startStage: (level: number, lives: number) => void;
@@ -281,7 +283,7 @@ export abstract class BaseStageScene extends Container {
         this.player.y < this.goal.y + this.goal.height
       ) {
         this.pauseState = 'clear';
-        this.pauseTimer = 30; // 30フレーム＝1秒（30fps時）
+        this.pauseTimer = 40; // 30フレーム＝1秒（30fps時）
         return;
       }
     }
@@ -310,6 +312,7 @@ export abstract class BaseStageScene extends Container {
         this.pauseState = 'death';
         this.pauseTimer = 30;
         this.resetTeleporting();
+        sound.play('death');
         return;
       }
     }
