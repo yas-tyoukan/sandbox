@@ -1,8 +1,10 @@
-import { Sound } from '@pixi/sound';
+import { sound } from '@pixi/sound';
 import { DotFilter, GlitchFilter } from 'pixi-filters';
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
+
+sound.add('title', 'sounds/title.mp3');
 
 export class TitleScene extends Container {
   private readonly onStart: (level: number) => void;
@@ -27,10 +29,7 @@ export class TitleScene extends Container {
     // 非同期初期化
     this.init();
 
-    Sound.from({
-      url: 'sounds/title.mp3',
-      autoPlay: true,
-    });
+    sound.play('title');
   }
 
   private async init() {
