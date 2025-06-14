@@ -1,5 +1,4 @@
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
-import { PowerSquare } from '~/entities/PowerSquare';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 
 export class Stage1Scene extends BaseStageScene {
@@ -12,8 +11,7 @@ export class Stage1Scene extends BaseStageScene {
   }
   protected override async initGoal() {
     // ゴールマーカー設置（最上段右端に設置）
-    this.goal = await PowerSquare.create(GAME_WIDTH - 32, this.platformYs[2]);
-    this.addChild(this.goal);
+    this.addGoal(GAME_WIDTH - 42, 2);
   }
   protected async initStage() {
     const margin = 60;

@@ -28,8 +28,6 @@ export class TitleScene extends Container {
 
     // 非同期初期化
     this.init();
-
-    sound.play('title');
   }
 
   private async init() {

@@ -1,3 +1,4 @@
+import { sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
@@ -5,6 +6,8 @@ import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 
 async function main() {
+  sound.add('title', 'sounds/title.mp3');
+  sound.play('title');
   const app = new PIXI.Application();
   await app.init({
     width: GAME_WIDTH,

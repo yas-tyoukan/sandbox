@@ -3,7 +3,7 @@ import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pix
 import { GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Player } from '~/entities/Player';
-import type { PowerSquare } from '~/entities/PowerSquare';
+import { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
 
 type Platform = { x: number; y: number; width: number; height: number };
@@ -370,6 +370,13 @@ export abstract class BaseStageScene extends Container {
       this.addChild(enemy);
     }
   }
+
+  protected async addGoal(x: number, floor: Floor) {
+    this.goal = await PowerSquare.create(x, this.platformYs[floor] - 10);
+    this.goal.anchor.set(0.5);
+    this.addChild(this.goal);
+  }
+
   private async startTeleporting({ x, y }: { x: number; y: number }) {
     this.teleportingTimer = 20;
     this.isTeleporting = true;
