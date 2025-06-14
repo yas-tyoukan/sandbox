@@ -36,8 +36,8 @@ export class Stage1Scene extends BaseStageScene {
         x: GAME_WIDTH / 2,
         floor: 1,
         bound: {
-          left: 60,
-          right: GAME_WIDTH - 60,
+          left: 70,
+          right: GAME_WIDTH - 70,
         },
         direction: -1,
       }, // 中段
@@ -45,7 +45,7 @@ export class Stage1Scene extends BaseStageScene {
         x: 50,
         floor: 2,
         bound: {
-          left: 60,
+          left: 70,
           right: GAME_WIDTH - 120,
         },
         direction: 1,

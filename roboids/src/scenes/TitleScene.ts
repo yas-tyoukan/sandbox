@@ -1,10 +1,7 @@
-import { sound } from '@pixi/sound';
 import { DotFilter, GlitchFilter } from 'pixi-filters';
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
-
-sound.add('title', 'sounds/title.mp3');
 
 export class TitleScene extends Container {
   private readonly onStart: (level: number) => void;
@@ -78,7 +75,7 @@ export class TitleScene extends Container {
 
     // ゲーム説明
     const desc = new Text({
-      text: '[W or ↑] jump    \n[A or ←] left    \n[D or →] right    \n[ SPACE ] Teleport',
+      text: '[   W   ] jump    \n[   A   ] left    \n[   D   ] right    \n[ SPACE ] Teleport',
       style: {
         fontFamily: 'monospace',
         fontSize: 12,
@@ -111,7 +108,7 @@ export class TitleScene extends Container {
     const enemyMaxY = boxY + boxHeight - 30;
     const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
     // 左
-    this.leftEnemy = new Enemy1(enemySheet, 0, 0, 0.5);
+    this.leftEnemy = new Enemy1(enemySheet, { bound: { left: 0, right: 0 }, direction: 0 });
     this.leftEnemy.anchor.set(0.5, 0.5);
     this.leftEnemy.x = boxX + 30;
     this.leftEnemy.y = boxY + 30;
@@ -119,7 +116,7 @@ export class TitleScene extends Container {
     this.addChild(this.leftEnemy);
 
     // 右
-    this.rightEnemy = new Enemy1(enemySheet, 0, 0, 0.5);
+    this.rightEnemy = new Enemy1(enemySheet, { bound: { left: 0, right: 0 }, direction: 0 });
     this.rightEnemy.anchor.set(0.5, 0.5);
     this.rightEnemy.x = boxX + boxWidth - 30;
     this.rightEnemy.y = boxY + boxHeight - 30;

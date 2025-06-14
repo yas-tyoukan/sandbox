@@ -12,6 +12,7 @@ type PauseState = 'none' | 'death' | 'clear';
 type Floor = 0 | 1 | 2; // 各段の床番号（0: 最下段, 1: 中段, 2: 最上段）
 
 sound.add('death', 'sounds/death.mp3');
+sound.add('beam', 'sounds/death.mp3');
 sound.add('goal', 'sounds/goal.mp3');
 sound.add('jump', 'sounds/jump.mp3');
 sound.add('teleport', 'sounds/teleport.mp3');
@@ -25,10 +26,6 @@ export abstract class BaseStageScene extends Container {
   protected platforms: Platform[] = [];
   protected teleports: TeleportPad[] = [];
   protected goal!: PowerSquare;
-  protected velocityY = 0;
-  protected isPlayerOnGround = true;
-  protected keys: Record<string, boolean> = {};
-  protected prevKeys: Record<string, boolean> = {};
   protected platformYs: number[] = [];
 
   private statusBar!: Graphics;
@@ -36,12 +33,25 @@ export abstract class BaseStageScene extends Container {
   private levelText!: Text;
   private gameOverModal?: Container;
 
+  // キー入力管理
+  protected keys: Record<string, boolean> = {};
+  protected prevKeys: Record<string, boolean> = {};
+
   // 停止状態管理
   private pauseState: PauseState = 'none';
   private pauseTimer = 0; // フレーム単位（30fpsなら30で1秒）
+
+  // テレポート状態管理
   private teleportingTimer = 0;
   private beforeTeleportPlayer: Player | null = null;
   private isTeleporting = false;
+  private wasTeleporting = false;
+
+  // ジャンプ状態管理
+  private isPlayerOnGround = true;
+  private velocityY = 0;
+  private jumpBuffered = false;
+  private wasOnGround = false; // 前フレームの着地状態
 
   constructor({
     startStage,
@@ -206,6 +216,9 @@ export abstract class BaseStageScene extends Container {
 
     // ====== 通常時の進行 ======
 
+    // ジャンプ
+    this.updateJump();
+
     // プレイヤー左右移動
     if (!this.isTeleporting) {
       const speed = PLAYER_SPEED;
@@ -227,33 +240,6 @@ export abstract class BaseStageScene extends Container {
       // 右端
       if (this.player.x + rightHalfWidth > GAME_WIDTH - offset) {
         this.player.x = GAME_WIDTH - rightHalfWidth - offset;
-      }
-
-      // ジャンプ
-      const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
-      if (isJumpJustPressed && this.isPlayerOnGround) {
-        this.velocityY = -8;
-        this.isPlayerOnGround = false;
-        sound.play('jump');
-      }
-
-      // 重力
-      // TODO 重力で自然な計算ではなく、頭打ちがある。調整が必要
-      this.velocityY += 0.5;
-      if (Math.abs(this.velocityY) > 2) {
-        this.player.y += this.velocityY;
-      }
-
-      // 床との当たり判定
-      this.isPlayerOnGround = false;
-      for (const p of this.platforms) {
-        const playerHeightWithOffset = this.player.height / 2 + 3;
-        const playerBottomY = this.player.y + playerHeightWithOffset;
-        if (playerBottomY >= p.y && playerBottomY <= p.y + p.height) {
-          this.player.y = p.y - playerHeightWithOffset;
-          this.velocityY = 0;
-          this.isPlayerOnGround = true;
-        }
       }
 
       // TELEPORT判定
@@ -278,6 +264,7 @@ export abstract class BaseStageScene extends Container {
           }
         }
       }
+      this.wasTeleporting = this.isTeleporting;
 
       // ゴール判定
       if (
@@ -356,13 +343,20 @@ export abstract class BaseStageScene extends Container {
     args: {
       x: number;
       floor: Floor;
-      bound: { left: number; right: number };
+      bound: {
+        left?: number;
+        right?: number;
+        leftMin?: number;
+        leftMax?: number;
+        rightMin?: number;
+        rightMax?: number;
+      };
       direction: number;
     }[],
   ) {
     const sheet: Spritesheet = await Assets.load('/images/enemy1.json');
     for (const { x, floor, bound, direction } of args) {
-      const enemy = new Enemy1(sheet, bound.left, bound.right, direction);
+      const enemy = new Enemy1(sheet, { bound, direction });
       enemy.x = x;
       enemy.y = this.platformYs[floor] - 24;
       enemy.anchor.set(0.5, 0.5);
@@ -405,6 +399,64 @@ export abstract class BaseStageScene extends Container {
       this.beforeTeleportPlayer.destroy();
       this.beforeTeleportPlayer = null;
     }
+  }
+
+  private updateJump() {
+    const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
+    const isJumpPressed = this.keys['KeyW'];
+    const isJumpJustReleased = !this.keys['KeyW'] && this.prevKeys['KeyW'];
+
+    // ジャンプ中またはテレポート中にwキーが新たに押された場合、ジャンプ予約
+    if (isJumpJustPressed && (!this.isPlayerOnGround || this.isTeleporting)) {
+      this.jumpBuffered = true;
+    }
+    // wキーを離したらジャンプ予約を解除（押しっぱなし抑制）
+    if (isJumpJustReleased) {
+      this.jumpBuffered = false;
+    }
+
+    if (isJumpJustPressed && this.isPlayerOnGround && !this.isTeleporting) {
+      this.velocityY = -8;
+      this.isPlayerOnGround = false;
+      sound.play('jump');
+    }
+
+    // 重力
+    this.velocityY += 0.5;
+    if (Math.abs(this.velocityY) > 2.2) {
+      // ジャンプの頭打ち
+      this.player.y += this.velocityY;
+    }
+
+    // 床との当たり判定
+    this.isPlayerOnGround = false;
+    for (const p of this.platforms) {
+      const playerHeightWithOffset = this.player.height / 2 + 3;
+      const playerBottomY = this.player.y + playerHeightWithOffset;
+      if (playerBottomY >= p.y && playerBottomY <= p.y + p.height) {
+        this.player.y = p.y - playerHeightWithOffset;
+        this.velocityY = 0;
+        this.isPlayerOnGround = true;
+      }
+    }
+
+    // 着地直後またはテレポート完了直後にジャンプ予約を消費する
+    if (
+      // ジャンプ予約があり、ジャンプキーが押されている
+      this.jumpBuffered &&
+      isJumpPressed &&
+      // 着地直後（前フレームは空中、今フレームは地上、かつテレポート中でない）
+      ((!this.wasOnGround && this.isPlayerOnGround && !this.isTeleporting) ||
+        // テレポート完了直後（前フレームはテレポート中、今フレームはテレポート終了）
+        (this.wasTeleporting && !this.isTeleporting))
+    ) {
+      this.velocityY = -8;
+      this.isPlayerOnGround = false;
+      sound.play('jump');
+      this.jumpBuffered = false;
+    }
+
+    this.wasOnGround = this.isPlayerOnGround;
   }
 
   // Game Overモーダル表示

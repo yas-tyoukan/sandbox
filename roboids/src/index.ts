@@ -6,8 +6,7 @@ import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 
 async function main() {
-  sound.add('title', 'sounds/title.mp3');
-  sound.play('title');
+  // sound.play('title');
   const app = new PIXI.Application();
   await app.init({
     width: GAME_WIDTH,
@@ -28,6 +27,8 @@ async function main() {
     const titleScene = new TitleScene(startStage);
     app.stage.addChild(titleScene);
     currentScene = titleScene;
+    // ブラウザの制限で、autoPlay:trueにしてもユーザのアクションなしには再生開始されない
+    sound.add('title', { url: 'sounds/title.mp3', autoPlay: true });
   }
 
   function startStage(level = 1, lives = 4) {
