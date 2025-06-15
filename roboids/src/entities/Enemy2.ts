@@ -1,73 +1,65 @@
-import { AnimatedSprite, Container, type Spritesheet } from 'pixi.js';
-
-// ビームクラス（寿命は持たない）
-class Beam extends Container {
-  private sprite: AnimatedSprite;
-
-  constructor(direction: number, spritesheet: Spritesheet) {
-    super();
-    const animName = direction === 1 ? 'beam_right' : 'beam_left';
-    this.sprite = new AnimatedSprite(spritesheet.animations[animName]);
-    this.sprite.animationSpeed = 1;
-    this.sprite.play();
-    this.addChild(this.sprite);
-  }
-}
+import { AnimatedSprite, type Spritesheet } from 'pixi.js';
+import { Beam } from './Beam';
 
 export class Enemy2 extends AnimatedSprite {
-  // 移動範囲
-  private leftBoundMin: number;
-  private leftBoundMax: number;
-  private rightBoundMin: number;
-  private rightBoundMax: number;
-  private leftBound: number;
-  private rightBound: number;
+  private leftBoundMin!: number;
+  private leftBoundMax!: number;
+  private rightBoundMin!: number;
+  private rightBoundMax!: number;
+  private leftBound!: number;
+  private rightBound!: number;
+  private direction!: number; // 1:右, -1:左
 
-  // 状態
-  private direction: number; // 1:右, -1:左
   private isShooting = false;
   private beam: Beam | null = null;
   private beamFrameCount = 0;
   private isTurning = false;
-  private turnAnimName: string | null = null;
+  private spritesheet!: Spritesheet;
 
-  // 依存
-  private spritesheet: Spritesheet;
+  // コンストラクタはprivate
+  private constructor(textures: any[]) {
+    super(textures);
+    this.animationSpeed = 1;
+    this.play();
+  }
 
-  constructor(
+  // static createでインスタンス生成＆初期化
+  static async create(
     spritesheet: Spritesheet,
     leftBoundMin: number,
     leftBoundMax: number,
     rightBoundMin: number,
     rightBoundMax: number,
     direction: number,
-  ) {
-    // 初期アニメーション
-    super(spritesheet.animations[direction === 1 ? 'move_right' : 'move_left']);
-    this.spritesheet = spritesheet;
-    this.leftBoundMin = leftBoundMin;
-    this.leftBoundMax = leftBoundMax;
-    this.rightBoundMin = rightBoundMin;
-    this.rightBoundMax = rightBoundMax;
-    this.leftBound = this.getRandomInRange(leftBoundMin, leftBoundMax);
-    this.rightBound = this.getRandomInRange(rightBoundMin, rightBoundMax);
-    this.direction = direction;
-    this.animationSpeed = 1;
-    this.play();
+  ): Promise<Enemy2> {
+    // 初期アニメーションは右向き
+    const instance = new Enemy2(spritesheet.animations['move_right']);
+    instance.spritesheet = spritesheet;
+    instance.leftBoundMin = leftBoundMin;
+    instance.leftBoundMax = leftBoundMax;
+    instance.rightBoundMin = rightBoundMin;
+    instance.rightBoundMax = rightBoundMax;
+    instance.leftBound = instance.getRandomInRange(leftBoundMin, leftBoundMax);
+    instance.rightBound = instance.getRandomInRange(rightBoundMin, rightBoundMax);
+    instance.direction = direction;
+    instance.setDirectionScale();
+    return instance;
   }
 
   private getRandomInRange(min: number, max: number): number {
     return Math.random() * (max - min) + min;
   }
 
-  // 呼び出し側でbeams配列を渡して管理する
-  updateMove(beams: Beam[]) {
-    // ビーム発射中
+  private setDirectionScale() {
+    // 右向き: scale.x=1, 左向き: scale.x=-1
+    this.scale.x = this.direction;
+  }
+
+  async updateMove(beams: Beam[]) {
     if (this.isShooting) {
       this.beamFrameCount++;
       if (this.beamFrameCount >= 20) {
-        // ビーム消去
-        if (this.beam?.parent) {
+        if (this.beam && this.beam.parent) {
           this.beam.parent.removeChild(this.beam);
         }
         this.beam = null;
@@ -78,39 +70,33 @@ export class Enemy2 extends AnimatedSprite {
       return;
     }
 
-    // 振り返り中
     if (this.isTurning) return;
 
-    // ランダムでビーム発射判定（1/10の確率）
+    // ランダムでビーム発射判定（1/10）
     if (Math.random() < 0.1) {
       this.isShooting = true;
-      this.beam = new Beam(this.direction, this.spritesheet);
+      this.beam = await Beam.create(this.direction, this.spritesheet);
       this.beam.position.set(this.x + this.width * 0.5 * this.direction, this.y);
+      if (this.parent) this.parent.addChild(this.beam);
       beams.push(this.beam);
-      if (this.parent) {
-        this.parent.addChild(this.beam);
-      }
       this.beamFrameCount = 0;
-      this.gotoAndStop(0); // ビーム発射時は停止
+      this.gotoAndStop(0);
       return;
     }
 
     // 通常移動
-    const speed = 2; // ENEMY2_SPEEDなどで調整
+    const speed = 2;
     this.x += speed * this.direction;
 
-    // 端到達時の振り返り処理
     if (this.direction === 1 && this.x > this.rightBound) {
       this.x = this.rightBound;
-      this.startTurning('turn_right_to_left');
-      // 往復範囲を更新
+      this.startTurning();
       this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
       this.rightBound = this.getRandomInRange(this.rightBoundMin, this.rightBoundMax);
     }
     if (this.direction === -1 && this.x < this.leftBound) {
       this.x = this.leftBound;
-      this.startTurning('turn_left_to_right');
-      // 往復範囲を更新
+      this.startTurning();
       this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
       this.rightBound = this.getRandomInRange(this.rightBoundMin, this.rightBoundMax);
     }
@@ -118,28 +104,26 @@ export class Enemy2 extends AnimatedSprite {
 
   private updateAnimation() {
     if (this.isShooting) {
-      // ビーム発射時は停止アニメ
-      const animName = this.direction === 1 ? 'shoot_right' : 'shoot_left';
-      this.textures = this.spritesheet.animations[animName];
+      this.textures = this.spritesheet.animations['shoot_right'];
       this.gotoAndStop(0);
-    } else if (this.isTurning && this.turnAnimName) {
-      this.textures = this.spritesheet.animations[this.turnAnimName];
+    } else if (this.isTurning) {
+      this.textures = this.spritesheet.animations['turn_right_to_left'];
       this.play();
     } else {
-      const animName = this.direction === 1 ? 'move_right' : 'move_left';
-      this.textures = this.spritesheet.animations[animName];
+      this.textures = this.spritesheet.animations['move_right'];
       this.play();
     }
+    this.setDirectionScale();
   }
 
-  private startTurning(animName: string) {
+  private startTurning() {
     this.isTurning = true;
-    this.turnAnimName = animName;
-    this.updateAnimation();
+    this.textures = this.spritesheet.animations['turn_right_to_left'];
     this.loop = false;
+    this.play();
+    this.setDirectionScale();
     this.onComplete = () => {
       this.isTurning = false;
-      this.turnAnimName = null;
       this.direction *= -1;
       this.loop = true;
       this.updateAnimation();
