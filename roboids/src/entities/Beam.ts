@@ -1,23 +1,17 @@
-import { AnimatedSprite, type Spritesheet } from 'pixi.js';
+import { Sprite, type Spritesheet, Texture } from 'pixi.js';
 
-export class Beam extends AnimatedSprite {
-  private constructor(textures: any[]) {
-    super(textures);
-    this.animationSpeed = 1;
-    this.play();
+export class Beam extends Sprite {
+  private constructor(texture: Texture) {
+    super(texture);
   }
 
   /**
    * direction: 1（右向き）, -1（左向き）
-   * spritesheet: ビームのアニメーションを含むSpritesheet
    */
-  static async create(direction: number, spritesheet: Spritesheet): Promise<Beam> {
-    // 必要ならここでawaitで非同期処理（例: スプライトシートのパース）も可能
-    const animName = direction === 1 ? 'beam_right' : 'beam_left';
-    const textures = spritesheet.animations[animName];
-    if (!textures) {
-      throw new Error(`Animation '${animName}' not found in spritesheet`);
-    }
-    return new Beam(textures);
+  static async create(direction: number): Promise<Beam> {
+    const texture = Texture.from('/images/beam.png'); // ビームのテクスチャを取得
+    const beam = new Beam(texture);
+    beam.scale.x = direction; // 右向き: 1, 左向き: -1 で反転
+    return beam;
   }
 }

@@ -1,10 +1,12 @@
 import { sound } from '@pixi/sound';
-import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
+import { Container, Graphics, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
+import { Enemy2 } from '~/entities/Enemy2';
 import { Player } from '~/entities/Player';
 import { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
+import type { Bound, Direction } from '~/types';
 
 type Platform = { x: number; y: number; width: number; height: number };
 
@@ -339,24 +341,48 @@ export abstract class BaseStageScene extends Container {
     });
   }
 
-  protected async addEnemies(
+  /**
+   * Enemy1を追加するメソッド
+   * @param args
+   * @protected
+   */
+  protected async addEnemy1(
     args: {
       x: number;
       floor: Floor;
-      bound: {
-        left?: number;
-        right?: number;
-        leftMin?: number;
-        leftMax?: number;
-        rightMin?: number;
-        rightMax?: number;
-      };
-      direction: number;
+      bound: Bound;
+      direction: Direction;
     }[],
   ) {
-    const sheet: Spritesheet = await Assets.load('/images/enemy1.json');
+    const length = args.length;
+    const enemies = await Promise.all(
+      args.map(({ bound, direction }) => Enemy1.create({ bound, direction })),
+    );
+    for (let i = 0; i < length; i++) {
+      const enemy = enemies[i];
+      const { x, floor } = args[i];
+      enemy.x = x;
+      enemy.y = this.platformYs[floor] - 24;
+      enemy.anchor.set(0.5, 0.5);
+      this.enemies.push(enemy);
+      this.addChild(enemy);
+    }
+  }
+
+  /**
+   * Enemy2を追加するメソッド
+   * @param args
+   */
+  protected async addEnemy2(
+    args: {
+      x: number;
+      floor: Floor;
+      bound: Bound;
+      direction: Direction;
+    }[],
+  ) {
     for (const { x, floor, bound, direction } of args) {
-      const enemy = new Enemy1(sheet, { bound, direction });
+      const enemy = await Promise.all([Enemy2.create({ bound, direction })]);
       enemy.x = x;
       enemy.y = this.platformYs[floor] - 24;
       enemy.anchor.set(0.5, 0.5);

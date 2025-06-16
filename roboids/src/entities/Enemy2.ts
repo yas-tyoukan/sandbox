@@ -1,53 +1,43 @@
-import { AnimatedSprite, type Spritesheet } from 'pixi.js';
+import { Assets, type Spritesheet } from 'pixi.js';
+import { ENEMY2_SPEED } from '~/constants/gameConfig';
+import { EnemyBase } from '~/entities/EnemyBase';
+import type { Bound, Direction } from '~/types';
 import { Beam } from './Beam';
 
-export class Enemy2 extends AnimatedSprite {
-  private leftBoundMin!: number;
-  private leftBoundMax!: number;
-  private rightBoundMin!: number;
-  private rightBoundMax!: number;
-  private leftBound!: number;
-  private rightBound!: number;
-  private direction!: number; // 1:右, -1:左
-
+export class Enemy2 extends EnemyBase {
   private isShooting = false;
-  private beam: Beam | null = null;
   private beamFrameCount = 0;
-  private isTurning = false;
-  private spritesheet!: Spritesheet;
 
-  // コンストラクタはprivate
-  private constructor(textures: any[]) {
-    super(textures);
-    this.animationSpeed = 1;
-    this.play();
+  private constructor(
+    spriteSheet: Spritesheet,
+    {
+      bound,
+      direction,
+      speed,
+    }: {
+      bound: Bound;
+      direction: Direction;
+      speed?: number;
+    },
+  ) {
+    super(spriteSheet, { bound, direction, speed });
   }
 
-  // static createでインスタンス生成＆初期化
-  static async create(
-    spritesheet: Spritesheet,
-    leftBoundMin: number,
-    leftBoundMax: number,
-    rightBoundMin: number,
-    rightBoundMax: number,
-    direction: number,
-  ): Promise<Enemy2> {
-    // 初期アニメーションは右向き
-    const instance = new Enemy2(spritesheet.animations['move_right']);
-    instance.spritesheet = spritesheet;
-    instance.leftBoundMin = leftBoundMin;
-    instance.leftBoundMax = leftBoundMax;
-    instance.rightBoundMin = rightBoundMin;
-    instance.rightBoundMax = rightBoundMax;
-    instance.leftBound = instance.getRandomInRange(leftBoundMin, leftBoundMax);
-    instance.rightBound = instance.getRandomInRange(rightBoundMin, rightBoundMax);
-    instance.direction = direction;
-    instance.setDirectionScale();
-    return instance;
-  }
-
-  private getRandomInRange(min: number, max: number): number {
-    return Math.random() * (max - min) + min;
+  static async create({
+    bound: { leftMin, leftMax, left, rightMin, rightMax, right },
+    direction,
+    speed = ENEMY2_SPEED,
+  }: {
+    bound: Bound;
+    direction: Direction;
+    speed?: number;
+  }) {
+    const sheet: Spritesheet = await Assets.load('/images/enemy2.json');
+    return new Enemy2(sheet, {
+      bound: { leftMin, leftMax, left, rightMin, rightMax, right },
+      direction,
+      speed,
+    });
   }
 
   private setDirectionScale() {
@@ -55,7 +45,8 @@ export class Enemy2 extends AnimatedSprite {
     this.scale.x = this.direction;
   }
 
-  async updateMove(beams: Beam[]) {
+  async updateMove() {
+    super.updateMove();
     if (this.isShooting) {
       this.beamFrameCount++;
       if (this.beamFrameCount >= 20) {

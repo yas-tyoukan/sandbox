@@ -108,7 +108,7 @@ export class TitleScene extends Container {
     const enemyMaxY = boxY + boxHeight - 30;
     const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
     // 左
-    this.leftEnemy = new Enemy1(enemySheet, { bound: { left: 0, right: 0 }, direction: 0 });
+    this.leftEnemy = await Enemy1.create({ bound: { left: 0, right: 0 }, direction: 0 });
     this.leftEnemy.anchor.set(0.5, 0.5);
     this.leftEnemy.x = boxX + 30;
     this.leftEnemy.y = boxY + 30;
@@ -116,7 +116,7 @@ export class TitleScene extends Container {
     this.addChild(this.leftEnemy);
 
     // 右
-    this.rightEnemy = new Enemy1(enemySheet, { bound: { left: 0, right: 0 }, direction: 0 });
+    this.rightEnemy = await Enemy1.create({ bound: { left: 0, right: 0 }, direction: 0, speed: 0 });
     this.rightEnemy.anchor.set(0.5, 0.5);
     this.rightEnemy.x = boxX + boxWidth - 30;
     this.rightEnemy.y = boxY + boxHeight - 30;
