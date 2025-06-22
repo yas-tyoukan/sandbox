@@ -1,6 +1,6 @@
 import { sound } from '@pixi/sound';
 import { Container, Graphics, Text, Ticker } from 'pixi.js';
-import { GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
+import { FLOOR_HEIGHT, GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
 import { Player } from '~/entities/Player';
@@ -29,6 +29,7 @@ export abstract class BaseStageScene extends Container {
   protected teleports: TeleportPad[] = [];
   protected goal!: PowerSquare;
   protected platformYs: number[] = [];
+  protected walls: Graphics[] = [];
 
   private statusBar!: Graphics;
   private livesText!: Text;
@@ -102,11 +103,10 @@ export abstract class BaseStageScene extends Container {
     const platformWidth = GAME_WIDTH;
     // 各段のY座標
     const bottomY = GAME_HEIGHT - margin - platformHeight;
-    const floorHeight = 102;
     const platformYs = [
       bottomY, // 最下段
-      bottomY - floorHeight, // 中段
-      bottomY - 2 * floorHeight, // 最上段
+      bottomY - FLOOR_HEIGHT, // 中段
+      bottomY - 2 * FLOOR_HEIGHT, // 最上段
     ];
     this.platformYs = platformYs;
     this.platforms = [
@@ -231,17 +231,47 @@ export abstract class BaseStageScene extends Container {
         this.player.x += speed;
       }
       // 壁との当たり判定
-      const anchorX = this.player.anchor?.x ?? 0.5; // デフォルト0.5（中心基準）
+      const anchorX = this.player.anchor?.x ?? 0.5;
       const halfWidth = this.player.width * anchorX;
       const rightHalfWidth = this.player.width * (1 - anchorX);
       const offset = 8;
-      // 左端
-      if (this.player.x - halfWidth < offset) {
+
+      // プレイヤーのx方向範囲
+      let playerLeft = this.player.x - halfWidth;
+      let playerRight = this.player.x + rightHalfWidth;
+
+      // 画面端の判定
+      if (playerLeft < offset) {
         this.player.x = halfWidth + offset;
+        playerLeft = this.player.x - halfWidth;
+        playerRight = this.player.x + rightHalfWidth;
       }
-      // 右端
-      if (this.player.x + rightHalfWidth > GAME_WIDTH - offset) {
+      if (playerRight > GAME_WIDTH - offset) {
         this.player.x = GAME_WIDTH - rightHalfWidth - offset;
+        playerLeft = this.player.x - halfWidth;
+        playerRight = this.player.x + rightHalfWidth;
+      }
+
+      // 壁との当たり判定
+      for (const wall of this.walls) {
+        const wallLeft = wall.x;
+        const wallRight = wall.x + wall.width;
+        // TODO 高さも判定に入れる。違うフロアなのに壁に当たった判定してしまう
+
+        // x軸だけのAABB判定
+        if (playerRight + offset > wallLeft && playerLeft - offset < wallRight) {
+          // どちらからめり込んだか判定
+          const overlapLeft = playerRight - wallLeft;
+          const overlapRight = wallRight - playerLeft;
+          if (overlapLeft < overlapRight) {
+            // 左からぶつかった
+            this.player.x -= overlapLeft + offset;
+          } else {
+            // 右からぶつかった
+            this.player.x += overlapRight + offset;
+          }
+          break;
+        }
       }
 
       // TELEPORT判定
@@ -341,6 +371,19 @@ export abstract class BaseStageScene extends Container {
     });
   }
 
+  protected addWall(x: number, floor: Floor) {
+    // プラットフォーム設計
+    const wallWidth = 8;
+    const wallHeight = FLOOR_HEIGHT;
+    const g = new Graphics();
+    g.rect(0, 0, wallWidth, wallHeight);
+    g.x = x;
+    g.y = this.platformYs[floor] - FLOOR_HEIGHT;
+    g.fill(0xffffff);
+    this.addChild(g);
+    this.walls.push(g);
+  }
+
   /**
    * Enemy1を追加するメソッド
    * @param args
@@ -382,12 +425,14 @@ export abstract class BaseStageScene extends Container {
     }[],
   ) {
     for (const { x, floor, bound, direction } of args) {
-      const enemy = await Promise.all([Enemy2.create({ bound, direction })]);
-      enemy.x = x;
-      enemy.y = this.platformYs[floor] - 24;
-      enemy.anchor.set(0.5, 0.5);
-      this.enemies.push(enemy);
-      this.addChild(enemy);
+      const enemies = await Promise.all([Enemy2.create({ bound, direction })]);
+      for (const enemy of enemies) {
+        enemy.x = x;
+        enemy.y = this.platformYs[floor] - 24;
+        enemy.anchor.set(0.5, 0.5);
+        this.enemies.push(enemy);
+        this.addChild(enemy);
+      }
     }
   }
 

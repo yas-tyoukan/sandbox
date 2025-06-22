@@ -7,6 +7,9 @@ import { Beam } from './Beam';
 export class Enemy2 extends EnemyBase {
   private isShooting = false;
   private beamFrameCount = 0;
+  private beam: Beam;
+  private isTurning: boolean;
+  spriteSheet: Spritesheet;
 
   private constructor(
     spriteSheet: Spritesheet,
@@ -19,8 +22,12 @@ export class Enemy2 extends EnemyBase {
       direction: Direction;
       speed?: number;
     },
+    beam: Beam,
   ) {
     super(spriteSheet, { bound, direction, speed });
+    this.beam = beam;
+    this.spriteSheet = spriteSheet;
+    this.isTurning = false;
   }
 
   static async create({
@@ -33,11 +40,16 @@ export class Enemy2 extends EnemyBase {
     speed?: number;
   }) {
     const sheet: Spritesheet = await Assets.load('/images/enemy2.json');
-    return new Enemy2(sheet, {
-      bound: { leftMin, leftMax, left, rightMin, rightMax, right },
-      direction,
-      speed,
-    });
+    const beam = await Beam.create(direction);
+    return new Enemy2(
+      sheet,
+      {
+        bound: { leftMin, leftMax, left, rightMin, rightMax, right },
+        direction,
+        speed,
+      },
+      beam,
+    );
   }
 
   private setDirectionScale() {
@@ -50,10 +62,7 @@ export class Enemy2 extends EnemyBase {
     if (this.isShooting) {
       this.beamFrameCount++;
       if (this.beamFrameCount >= 20) {
-        if (this.beam && this.beam.parent) {
-          this.beam.parent.removeChild(this.beam);
-        }
-        this.beam = null;
+        this.beam.visible = false;
         this.isShooting = false;
         this.beamFrameCount = 0;
         this.updateAnimation();
@@ -66,42 +75,23 @@ export class Enemy2 extends EnemyBase {
     // ランダムでビーム発射判定（1/10）
     if (Math.random() < 0.1) {
       this.isShooting = true;
-      this.beam = await Beam.create(this.direction, this.spritesheet);
       this.beam.position.set(this.x + this.width * 0.5 * this.direction, this.y);
       if (this.parent) this.parent.addChild(this.beam);
-      beams.push(this.beam);
       this.beamFrameCount = 0;
       this.gotoAndStop(0);
       return;
-    }
-
-    // 通常移動
-    const speed = 2;
-    this.x += speed * this.direction;
-
-    if (this.direction === 1 && this.x > this.rightBound) {
-      this.x = this.rightBound;
-      this.startTurning();
-      this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
-      this.rightBound = this.getRandomInRange(this.rightBoundMin, this.rightBoundMax);
-    }
-    if (this.direction === -1 && this.x < this.leftBound) {
-      this.x = this.leftBound;
-      this.startTurning();
-      this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
-      this.rightBound = this.getRandomInRange(this.rightBoundMin, this.rightBoundMax);
     }
   }
 
   private updateAnimation() {
     if (this.isShooting) {
-      this.textures = this.spritesheet.animations['shoot_right'];
+      this.textures = this.spriteSheet.animations['shoot_right'];
       this.gotoAndStop(0);
     } else if (this.isTurning) {
-      this.textures = this.spritesheet.animations['turn_right_to_left'];
+      this.textures = this.spriteSheet.animations['turn_right_to_left'];
       this.play();
     } else {
-      this.textures = this.spritesheet.animations['move_right'];
+      this.textures = this.spriteSheet.animations['move_right'];
       this.play();
     }
     this.setDirectionScale();
@@ -109,7 +99,7 @@ export class Enemy2 extends EnemyBase {
 
   private startTurning() {
     this.isTurning = true;
-    this.textures = this.spritesheet.animations['turn_right_to_left'];
+    this.textures = this.spriteSheet.animations['turn_right_to_left'];
     this.loop = false;
     this.play();
     this.setDirectionScale();
