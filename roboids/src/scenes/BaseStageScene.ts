@@ -230,7 +230,7 @@ export abstract class BaseStageScene extends Container {
       if (this.keys['KeyD']) {
         this.player.x += speed;
       }
-      // 壁との当たり判定
+
       const anchorX = this.player.anchor?.x ?? 0.5;
       const halfWidth = this.player.width * anchorX;
       const rightHalfWidth = this.player.width * (1 - anchorX);
@@ -256,7 +256,9 @@ export abstract class BaseStageScene extends Container {
       for (const wall of this.walls) {
         const wallLeft = wall.x;
         const wallRight = wall.x + wall.width;
-        // TODO 高さも判定に入れる。違うフロアなのに壁に当たった判定してしまう
+        const wallBottom = wall.y + wall.height;
+        // 同じフロアの壁かどうか
+        if (wallBottom < this.player.y || this.player.y < wallBottom - FLOOR_HEIGHT) break;
 
         // x軸だけのAABB判定
         if (playerRight + offset > wallLeft && playerLeft - offset < wallRight) {
@@ -285,11 +287,11 @@ export abstract class BaseStageScene extends Container {
           this.isPlayerOnGround &&
           isSpaceJustPressed
         ) {
-          const pair = this.teleports.find((other) => other !== tp && other.pairId === tp.pairId);
-          if (pair) {
+          const to = this.teleports.find((other) => other.id === tp.toId);
+          if (to) {
             this.startTeleporting({ x: this.player.x, y: this.player.y });
-            this.player.x = pair.x;
-            this.player.y = pair.y - this.player.height / 2 - 3;
+            this.player.x = to.x;
+            this.player.y = to.y - this.player.height / 2 - 3;
             this.isPlayerOnGround = true;
             sound.play('teleport');
             break;
@@ -325,12 +327,17 @@ export abstract class BaseStageScene extends Container {
       const enemyCenterX = enemy.x + enemy.width * eAnchorX;
       const enemyCenterY = enemy.y + enemy.height * eAnchorY;
 
-      const dx = Math.abs(playerCenterX - enemyCenterX);
-      const dy = Math.abs(playerCenterY - enemyCenterY);
+      // x方向の当たり判定
       const halfW = (this.player.width + enemy.width) / 2;
-      const halfH = (this.player.height + enemy.height + 14) / 2;
+      const isTouchingX = Math.abs(playerCenterX - enemyCenterX) < halfW;
 
-      if (dx < halfW && dy < halfH) {
+      // y方向の当たり判定
+      const dy = playerCenterY - enemyCenterY;
+      // プレイヤーが敵より上にいる場合と下にいる場合(フロアが異なる場合)で当たり判定の範囲を調整している
+      const isTouchingY =
+        dy < 0 ? -dy < (this.player.height + enemy.height + 14) / 2 : dy < enemy.height / 2;
+
+      if (isTouchingX && isTouchingY) {
         this.lives--;
         this.updateStatusBar();
         this.pauseState = 'death';
@@ -356,16 +363,16 @@ export abstract class BaseStageScene extends Container {
   // ステージを最初からやり直し(サブクラスで実装)
   protected abstract restartStage(): void;
 
-  protected async addPlayer({ x, y }: { x: number; y: number }) {
+  protected async addPlayer({ x, floor }: { x: number; floor: Floor }) {
     this.player = await Player.create();
     this.player.x = x;
-    this.player.y = y;
+    this.player.y = this.platformYs[floor] - this.player.height / 2;
     this.player.anchor.set(0.5, 0.5);
     this.addChild(this.player);
   }
 
-  protected addTeleportPad(x: number, floor: Floor, pairId: number) {
-    TeleportPad.create(x, this.platformYs[floor], pairId).then((pad) => {
+  protected addTeleportPad(x: number, floor: Floor, id: number, toId: number) {
+    TeleportPad.create(x, this.platformYs[floor], id, toId).then((pad) => {
       this.teleports.push(pad);
       this.addChild(pad);
     });

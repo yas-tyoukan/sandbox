@@ -44,9 +44,14 @@ export abstract class EnemyBase extends AnimatedSprite {
   private getRandomInRange(min: number, max: number): number {
     return Math.random() * (max - min) + min;
   }
-
   private resetBounds() {
+    this.resetLeftBound();
+    this.resetRightBound();
+  }
+  private resetLeftBound() {
     this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
+  }
+  private resetRightBound() {
     this.rightBound = this.getRandomInRange(this.rightBoundMin, this.rightBoundMax);
   }
 
@@ -57,15 +62,13 @@ export abstract class EnemyBase extends AnimatedSprite {
     if (this.x < this.leftBound) {
       this.x = this.leftBound;
       this.direction = 1;
-      // 次の往復のために右端・左端をランダムで更新
-      this.resetBounds();
+      this.resetRightBound();
     }
     // 右端に到達
     if (this.x > this.rightBound) {
       this.x = this.rightBound;
       this.direction = -1;
-      // 次の往復のために右端・左端をランダムで更新
-      this.resetBounds();
+      this.resetLeftBound();
     }
   }
 }

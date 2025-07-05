@@ -7,19 +7,18 @@ export class Stage1Scene extends BaseStageScene {
       this.player.destroy();
     }
     // プレイヤー（最下段左端に設置）
-    await this.addPlayer({ x: 28, y: GAME_HEIGHT - 40 });
+    await this.addPlayer({ x: 28, floor: 0 });
   }
   protected override async initGoal() {
     // ゴールマーカー設置（最上段右端に設置）
     this.addGoal(GAME_WIDTH - 42, 2);
   }
   protected async initStage() {
-    const margin = 60;
-    this.addTeleportPad(GAME_WIDTH - margin, 0, 0);
-    // this.addTeleportPad(100, 0, 0);
-    this.addTeleportPad(margin, 1, 0);
-    this.addTeleportPad(GAME_WIDTH - margin, 1, 1);
-    this.addTeleportPad(margin, 2, 1);
+    const margin = 54;
+    this.addTeleportPad(GAME_WIDTH - margin, 0, 0, 1);
+    this.addTeleportPad(margin, 1, 1, 0);
+    this.addTeleportPad(GAME_WIDTH - margin, 1, 2, 3);
+    this.addTeleportPad(margin, 2, 3, 2);
 
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemy1([
