@@ -27,24 +27,35 @@ export class Stage2Scene extends BaseStageScene {
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemy1([
       {
-        x: 400,
+        x: 320,
         floor: 0,
         bound: {
-          left: 400,
+          left: 318,
           right: GAME_WIDTH - 10,
         },
-        direction: 1,
+        direction: -1,
       }, // 最下段
       {
-        x: GAME_WIDTH - 70,
+        x: 266,
         floor: 1,
         bound: {
-          leftMin: 24,
+          leftMin: 64,
           leftMax: GAME_WIDTH - 70,
           right: GAME_WIDTH - 10,
         },
         direction: -1,
       }, // 中段
+    ]);
+    this.addEnemy2([
+      {
+        x: 266,
+        floor: 2,
+        bound: {
+          left: 96,
+          right: GAME_WIDTH - 96,
+        },
+        direction: 1,
+      }, // 最上段
     ]);
   }
 

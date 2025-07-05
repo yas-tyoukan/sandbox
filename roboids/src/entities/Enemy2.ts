@@ -28,10 +28,14 @@ export class Enemy2 extends EnemyBase {
     this.beam = beam;
     this.spriteSheet = spriteSheet;
     this.isTurning = false;
+    this.setDirectionScale();
+    this.updateAnimation();
+    this.scale.x = this.direction;
+    this.loop = false;
   }
 
   static async create({
-    bound: { leftMin, leftMax, left, rightMin, rightMax, right },
+    bound,
     direction,
     speed = ENEMY2_SPEED,
   }: {
@@ -41,74 +45,61 @@ export class Enemy2 extends EnemyBase {
   }) {
     const sheet: Spritesheet = await Assets.load('/images/enemy2.json');
     const beam = await Beam.create(direction);
-    return new Enemy2(
-      sheet,
-      {
-        bound: { leftMin, leftMax, left, rightMin, rightMax, right },
-        direction,
-        speed,
-      },
-      beam,
-    );
+    return new Enemy2(sheet, { bound, direction, speed }, beam);
   }
 
   private setDirectionScale() {
-    // 右向き: scale.x=1, 左向き: scale.x=-1
     this.scale.x = this.direction;
   }
 
-  async updateMove() {
-    super.updateMove();
-    if (this.isShooting) {
-      this.beamFrameCount++;
-      if (this.beamFrameCount >= 20) {
-        this.beam.visible = false;
-        this.isShooting = false;
-        this.beamFrameCount = 0;
-        this.updateAnimation();
-      }
-      return;
-    }
-
-    if (this.isTurning) return;
-
-    // ランダムでビーム発射判定（1/10）
-    if (Math.random() < 0.1) {
-      this.isShooting = true;
-      this.beam.position.set(this.x + this.width * 0.5 * this.direction, this.y);
-      if (this.parent) this.parent.addChild(this.beam);
-      this.beamFrameCount = 0;
-      this.gotoAndStop(0);
-      return;
-    }
-  }
-
-  private updateAnimation() {
-    if (this.isShooting) {
-      this.textures = this.spriteSheet.animations['shoot_right'];
-      this.gotoAndStop(0);
-    } else if (this.isTurning) {
-      this.textures = this.spriteSheet.animations['turn_right_to_left'];
-      this.play();
-    } else {
-      this.textures = this.spriteSheet.animations['move_right'];
-      this.play();
-    }
-    this.setDirectionScale();
-  }
-
+  // 振り向きアニメーションの開始
   private startTurning() {
     this.isTurning = true;
-    this.textures = this.spriteSheet.animations['turn_right_to_left'];
-    this.loop = false;
+    if (this.direction === 1) {
+      // 右→左
+      this.textures = this.spriteSheet.animations['turn_right_to_left'];
+    } else {
+      // 左→右
+      this.textures = this.spriteSheet.animations['turn_left_to_right'];
+    }
     this.play();
-    this.setDirectionScale();
     this.onComplete = () => {
       this.isTurning = false;
       this.direction *= -1;
-      this.loop = true;
       this.updateAnimation();
       this.onComplete = undefined;
     };
+  }
+
+  // アニメーション切り替え
+  private updateAnimation() {
+    if (this.isTurning) return;
+    if (this.direction === 1) {
+      this.textures = this.spriteSheet.animations['move_right'];
+    } else {
+      this.textures = this.spriteSheet.animations['move_left'];
+    }
+    this.play();
+  }
+
+  // 移動処理のオーバーライド
+  updateMove() {
+    if (this.isTurning) return; // 振り向き中は何もしない
+
+    // 端に到達したら振り向き開始
+    if (this.direction === 1 && this.x > this.rightBound) {
+      this.x = this.rightBound;
+      this.startTurning();
+      return;
+    }
+    if (this.direction === -1 && this.x < this.leftBound) {
+      this.x = this.leftBound;
+      this.startTurning();
+      return;
+    }
+
+    // 通常移動
+    this.x += this.speed * this.direction;
+    this.updateAnimation();
   }
 }

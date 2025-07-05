@@ -36,17 +36,13 @@ export abstract class EnemyBase extends AnimatedSprite {
 
     this.speed = speed;
 
-    // 初期値は範囲内でランダム
-    this.resetBounds();
     this.direction = direction;
+    this.leftBound = this.leftBoundMin;
+    this.rightBound = this.rightBoundMax;
   }
 
   private getRandomInRange(min: number, max: number): number {
     return Math.random() * (max - min) + min;
-  }
-  private resetBounds() {
-    this.resetLeftBound();
-    this.resetRightBound();
   }
   private resetLeftBound() {
     this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);
