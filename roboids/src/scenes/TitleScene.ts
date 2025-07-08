@@ -18,7 +18,7 @@ export class TitleScene extends Container {
     // 画面クリックでスタート
     this.eventMode = 'static';
     this.cursor = 'pointer';
-    this.on('pointerdown', () => this.onStart(2));
+    this.on('pointerdown', () => this.onStart(1));
 
     // キー入力でスタート
     window.addEventListener('keydown', this.handleKeyDown);

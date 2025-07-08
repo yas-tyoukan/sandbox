@@ -5,10 +5,12 @@ import { EnemyBase } from '~/entities/EnemyBase';
 import type { Bound, Direction } from '~/types';
 import { playSE } from '~/utils/playSE';
 import { Beam } from './Beam';
+import type { Player } from './Player';
 
 sound.add('beam', 'sounds/death.mp3');
 
 const RATE_BEAM = 0.025; // ビーム発射率
+const BEAM_FRAME_COUNT = 19; // ビームのフレーム数
 
 export class Enemy2 extends EnemyBase {
   private isShooting = false;
@@ -95,7 +97,7 @@ export class Enemy2 extends EnemyBase {
     // ビーム発射中は移動せず、ビームのフレーム管理のみ
     if (this.isShooting) {
       this.beamFrameCount++;
-      if (this.beamFrameCount >= 19) {
+      if (this.beamFrameCount >= BEAM_FRAME_COUNT) {
         this.isShooting = false;
         this.beam.visible = false;
         this.beamFrameCount = 0;
@@ -137,5 +139,32 @@ export class Enemy2 extends EnemyBase {
     // 通常移動
     this.x += this.speed * this.direction;
     this.updateAnimation();
+  }
+  isHitPlayer(player: Player) {
+    if (super.isHitPlayer(player)) return true;
+    if (!this.isShooting) return false;
+    // プレイヤーとビームのAABB判定
+    const aex = this.beam.anchor.x;
+    const aey = this.beam.anchor.y;
+    const beamRect = {
+      left: this.beam.x - this.beam.width * aex,
+      right: this.beam.x + this.beam.width * (1 - aex),
+      top: this.beam.y - this.beam.height * aey,
+      bottom: this.beam.y + this.beam.height * (1 - aey),
+    };
+    const pax = player.anchor.x;
+    const pay = player.anchor.y;
+    const playerRect = {
+      left: player.x - player.width * pax,
+      right: player.x + player.width * (1 - pax),
+      top: player.y - player.height * pay,
+      bottom: player.y + player.height * (1 - pay),
+    };
+    return (
+      playerRect.right > beamRect.left &&
+      playerRect.left < beamRect.right &&
+      playerRect.bottom > beamRect.top &&
+      playerRect.top < beamRect.bottom
+    );
   }
 }

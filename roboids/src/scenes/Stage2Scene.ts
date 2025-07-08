@@ -1,4 +1,4 @@
-import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
+import { GAME_WIDTH } from '~/constants/gameConfig';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 
 export class Stage2Scene extends BaseStageScene {
@@ -25,27 +25,27 @@ export class Stage2Scene extends BaseStageScene {
     this.addWall(116, 0);
 
     // Enemy1の配置（各段中央付近で左右移動）
-    // this.addEnemy1([
-    //   {
-    //     x: 320,
-    //     floor: 0,
-    //     bound: {
-    //       left: 318,
-    //       right: GAME_WIDTH - 10,
-    //     },
-    //     direction: -1,
-    //   }, // 最下段
-    //   {
-    //     x: 266,
-    //     floor: 1,
-    //     bound: {
-    //       leftMin: 64,
-    //       leftMax: GAME_WIDTH - 70,
-    //       right: GAME_WIDTH - 10,
-    //     },
-    //     direction: -1,
-    //   }, // 中段
-    // ]);
+    this.addEnemy1([
+      {
+        x: 320,
+        floor: 0,
+        bound: {
+          left: 318,
+          right: GAME_WIDTH - 10,
+        },
+        direction: -1,
+      }, // 最下段
+      {
+        x: 266,
+        floor: 1,
+        bound: {
+          leftMin: 64,
+          leftMax: GAME_WIDTH - 70,
+          right: GAME_WIDTH - 10,
+        },
+        direction: -1,
+      }, // 中段
+    ]);
     this.addEnemy2([
       {
         x: 266,

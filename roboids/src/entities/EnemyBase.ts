@@ -1,5 +1,6 @@
 import { AnimatedSprite, type Spritesheet } from 'pixi.js';
 import type { Bound, Direction } from '~/types/index';
+import type { Player } from './Player';
 
 export abstract class EnemyBase extends AnimatedSprite {
   protected leftBound = 0;
@@ -66,5 +67,30 @@ export abstract class EnemyBase extends AnimatedSprite {
       this.direction = -1;
       this.resetLeftBound();
     }
+  }
+
+  isHitPlayer(player: Player) {
+    // プレイヤー
+    const pAnchorX = player.anchor?.x ?? 0;
+    const pAnchorY = player.anchor?.y ?? 0;
+    const playerCenterX = player.x + player.width * pAnchorX;
+    const playerCenterY = player.y + player.height * pAnchorY;
+    // 敵
+    const eAnchorX = this.anchor?.x ?? 0;
+    const eAnchorY = this.anchor?.y ?? 0;
+    const thisCenterX = this.x + this.width * eAnchorX;
+    const thisCenterY = this.y + this.height * eAnchorY;
+
+    // x方向の当たり判定
+    const halfW = (player.width + this.width) / 2;
+    const isTouchingX = Math.abs(playerCenterX - thisCenterX) < halfW;
+
+    // y方向の当たり判定
+    const dy = playerCenterY - thisCenterY;
+    // プレイヤーが敵より上にいる場合と下にいる場合(フロアが異なる場合)で当たり判定の範囲を調整している
+    const isTouchingY =
+      dy < 0 ? -dy < (player.height + this.height + 14) / 2 : dy < this.height / 2;
+
+    return isTouchingY && isTouchingX;
   }
 }

@@ -319,7 +319,7 @@ export abstract class BaseStageScene extends Container {
         this.player.y < this.goal.y + this.goal.height
       ) {
         this.pauseState = 'clear';
-        this.pauseTimer = 40; // 30フレーム＝1秒（30fps時）
+        this.pauseTimer = 40;
         playSE('goal');
         return;
       }
@@ -327,28 +327,7 @@ export abstract class BaseStageScene extends Container {
 
     // 敵との当たり判定
     for (const enemy of this.enemies) {
-      // プレイヤー
-      const pAnchorX = this.player.anchor?.x ?? 0;
-      const pAnchorY = this.player.anchor?.y ?? 0;
-      const playerCenterX = this.player.x + this.player.width * pAnchorX;
-      const playerCenterY = this.player.y + this.player.height * pAnchorY;
-      // 敵
-      const eAnchorX = enemy.anchor?.x ?? 0;
-      const eAnchorY = enemy.anchor?.y ?? 0;
-      const enemyCenterX = enemy.x + enemy.width * eAnchorX;
-      const enemyCenterY = enemy.y + enemy.height * eAnchorY;
-
-      // x方向の当たり判定
-      const halfW = (this.player.width + enemy.width) / 2;
-      const isTouchingX = Math.abs(playerCenterX - enemyCenterX) < halfW;
-
-      // y方向の当たり判定
-      const dy = playerCenterY - enemyCenterY;
-      // プレイヤーが敵より上にいる場合と下にいる場合(フロアが異なる場合)で当たり判定の範囲を調整している
-      const isTouchingY =
-        dy < 0 ? -dy < (this.player.height + enemy.height + 14) / 2 : dy < enemy.height / 2;
-
-      if (isTouchingX && isTouchingY) {
+      if (enemy.isHitPlayer(this.player)) {
         this.lives--;
         this.updateStatusBar();
         this.pauseState = 'death';
@@ -359,7 +338,7 @@ export abstract class BaseStageScene extends Container {
       }
     }
 
-    // Enemy1の左右移動
+    // Enemyの移動
     for (const enemy of this.enemies) {
       enemy.updateMove();
     }
