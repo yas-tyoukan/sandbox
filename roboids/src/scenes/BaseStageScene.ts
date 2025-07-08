@@ -7,6 +7,7 @@ import { Player } from '~/entities/Player';
 import { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction } from '~/types';
+import { playSE } from '~/utils/playSE';
 
 type Platform = { x: number; y: number; width: number; height: number };
 
@@ -14,7 +15,6 @@ type PauseState = 'none' | 'death' | 'clear';
 type Floor = 0 | 1 | 2; // 各段の床番号（0: 最下段, 1: 中段, 2: 最上段）
 
 sound.add('death', 'sounds/death.mp3');
-sound.add('beam', 'sounds/death.mp3');
 sound.add('goal', 'sounds/goal.mp3');
 sound.add('jump', 'sounds/jump.mp3');
 sound.add('teleport', 'sounds/teleport.mp3');
@@ -304,7 +304,7 @@ export abstract class BaseStageScene extends Container {
             this.player.x = to.x;
             this.player.y = to.y - this.player.height / 2 - 3;
             this.isPlayerOnGround = true;
-            sound.play('teleport');
+            playSE('teleport');
             break;
           }
         }
@@ -320,7 +320,7 @@ export abstract class BaseStageScene extends Container {
       ) {
         this.pauseState = 'clear';
         this.pauseTimer = 40; // 30フレーム＝1秒（30fps時）
-        sound.play('goal');
+        playSE('goal');
         return;
       }
     }
@@ -354,7 +354,7 @@ export abstract class BaseStageScene extends Container {
         this.pauseState = 'death';
         this.pauseTimer = 30;
         this.resetTeleporting();
-        sound.play('death');
+        playSE('death');
         return;
       }
     }
@@ -507,7 +507,7 @@ export abstract class BaseStageScene extends Container {
     if (isJumpJustPressed && this.isPlayerOnGround && !this.isTeleporting) {
       this.velocityY = -8;
       this.isPlayerOnGround = false;
-      sound.play('jump');
+      playSE('jump');
     }
 
     // 重力
@@ -541,7 +541,7 @@ export abstract class BaseStageScene extends Container {
     ) {
       this.velocityY = -8;
       this.isPlayerOnGround = false;
-      sound.play('jump');
+      playSE('jump');
       this.jumpBuffered = false;
     }
 

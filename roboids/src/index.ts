@@ -6,7 +6,7 @@ import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 
 async function main() {
-  // sound.play('title');
+  // playSE('title');
   const app = new PIXI.Application();
   await app.init({
     width: GAME_WIDTH,

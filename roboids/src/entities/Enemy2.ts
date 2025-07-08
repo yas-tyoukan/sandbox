@@ -1,8 +1,14 @@
+import { sound } from '@pixi/sound';
 import { Assets, type Spritesheet } from 'pixi.js';
 import { ENEMY2_SPEED } from '~/constants/gameConfig';
 import { EnemyBase } from '~/entities/EnemyBase';
 import type { Bound, Direction } from '~/types';
+import { playSE } from '~/utils/playSE';
 import { Beam } from './Beam';
+
+sound.add('beam', 'sounds/death.mp3');
+
+const RATE_BEAM = 0.025; // ビーム発射率
 
 export class Enemy2 extends EnemyBase {
   private isShooting = false;
@@ -86,13 +92,43 @@ export class Enemy2 extends EnemyBase {
   updateMove() {
     if (this.isTurning) return; // 振り向き中は何もしない
 
+    // ビーム発射中は移動せず、ビームのフレーム管理のみ
+    if (this.isShooting) {
+      this.beamFrameCount++;
+      if (this.beamFrameCount >= 19) {
+        this.isShooting = false;
+        this.beam.visible = false;
+        this.beamFrameCount = 0;
+        this.updateAnimation(); // 移動アニメーションに戻す
+      }
+      return;
+    }
+
+    // 10%の確率でビーム発射
+    if (Math.random() < RATE_BEAM) {
+      this.isShooting = true;
+      this.beamFrameCount = 0;
+      this.beam.visible = true;
+      // ビームの位置と向き
+      this.beam.x = this.x + 40 * this.direction;
+      this.beam.y = this.y - 7;
+      this.beam.scale.x = -this.direction;
+      if (this.parent && !this.beam.parent) {
+        this.parent.addChild(this.beam);
+      }
+      playSE('beam');
+
+      this.gotoAndStop(0); // ビーム発射中は静止アニメーション
+      return;
+    }
+
     // 端に到達したら振り向き開始
-    if (this.direction === 1 && this.x > this.rightBound) {
+    if (this.direction === 1 && this.x + this.speed > this.rightBound) {
       this.x = this.rightBound;
       this.startTurning();
       return;
     }
-    if (this.direction === -1 && this.x < this.leftBound) {
+    if (this.direction === -1 && this.x - this.speed < this.leftBound) {
       this.x = this.leftBound;
       this.startTurning();
       return;
