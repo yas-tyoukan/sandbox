@@ -181,6 +181,16 @@ export abstract class BaseStageScene extends Container {
     this.keys[e.code] = false;
   };
 
+  private resetJumpState() {
+    this.jumpBuffered = false;
+    this.isPlayerOnGround = true;
+    this.velocityY = 0;
+    this.wasOnGround = false;
+    // キー入力状態もリセット
+    this.keys = {};
+    this.prevKeys = {};
+  }
+
   /**
    * 更新処理
    */
@@ -202,6 +212,7 @@ export abstract class BaseStageScene extends Container {
           if (this.lives === 0) {
             this.showGameOver();
           } else {
+            this.resetJumpState();
             this.restartStage();
           }
         } else if (this.pauseState === 'clear') {
