@@ -1,9 +1,10 @@
 import { sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
-import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL } from '~/constants/gameConfig';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
 import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { TitleScene } from '~/scenes/TitleScene';
+import { Stage3Scene } from './scenes/Stage3Scene';
 
 async function main() {
   const app = new PIXI.Application();
@@ -23,7 +24,7 @@ async function main() {
       currentScene.destroy({ children: true });
       app.stage.removeChild(currentScene);
     }
-    const titleScene = new TitleScene(startStage);
+    const titleScene = new TitleScene(startStage, START_LEVEL);
     app.stage.addChild(titleScene);
     currentScene = titleScene;
     // ブラウザの制限で、autoPlay:trueにしてもユーザのアクションなしには再生開始されない
@@ -48,6 +49,8 @@ async function main() {
           return new Stage1Scene(args);
         case 2:
           return new Stage2Scene(args);
+        case 3:
+          return new Stage3Scene(args);
         default:
           throw new Error(`Unknown level: ${level}`);
       }

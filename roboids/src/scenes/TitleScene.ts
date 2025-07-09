@@ -11,14 +11,14 @@ export class TitleScene extends Container {
   private frameBox!: Graphics;
   private animationState: { direction: number } = { direction: 1 };
 
-  constructor(onStart: (level: number) => void) {
+  constructor(onStart: (level: number) => void, level = 1) {
     super();
     this.onStart = onStart;
 
     // 画面クリックでスタート
     this.eventMode = 'static';
     this.cursor = 'pointer';
-    this.on('pointerdown', () => this.onStart(1));
+    this.on('pointerdown', () => this.onStart(level));
 
     // キー入力でスタート
     window.addEventListener('keydown', this.handleKeyDown);

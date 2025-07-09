@@ -36,9 +36,8 @@ export class Enemy2 extends EnemyBase {
     this.beam = beam;
     this.spriteSheet = spriteSheet;
     this.isTurning = false;
-    this.setDirectionScale();
+    this.direction = direction;
     this.updateAnimation();
-    this.scale.x = this.direction;
     this.loop = false;
   }
 
@@ -54,10 +53,6 @@ export class Enemy2 extends EnemyBase {
     const sheet: Spritesheet = await Assets.load('/images/enemy2.json');
     const beam = await Beam.create(direction);
     return new Enemy2(sheet, { bound, direction, speed }, beam);
-  }
-
-  private setDirectionScale() {
-    this.scale.x = this.direction;
   }
 
   // 振り向きアニメーションの開始

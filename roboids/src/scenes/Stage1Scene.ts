@@ -27,7 +27,7 @@ export class Stage1Scene extends BaseStageScene {
         floor: 0,
         bound: {
           left: 100,
-          right: GAME_WIDTH - 10,
+          right: GAME_WIDTH - 20,
         },
         direction: 1,
       }, // 最下段
