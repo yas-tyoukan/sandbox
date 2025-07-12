@@ -56,7 +56,7 @@ export class Stage1Scene extends BaseStageScene {
     return 1;
   }
 
-  protected override restartStage() {
+  protected override doRestartStage() {
     this.initPlayer();
   }
 }

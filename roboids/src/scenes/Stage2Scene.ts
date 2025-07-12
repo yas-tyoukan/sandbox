@@ -63,7 +63,7 @@ export class Stage2Scene extends BaseStageScene {
     return 2;
   }
 
-  protected override restartStage() {
+  protected override doRestartStage() {
     this.initPlayer();
   }
 }

@@ -18,8 +18,8 @@ export class Stage3Scene extends BaseStageScene {
     this.addTeleportPad(margin, 0, 0, 2);
     this.addTeleportPad(margin, 1, 1, 0);
     this.addTeleportPad(margin, 2, 2, 1);
-
-    this.addWall(424, 2);
+    this.addForceFieldPad(GAME_WIDTH - margin, 1);
+    this.addForceField(424, 2);
 
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemy2([
@@ -57,7 +57,7 @@ export class Stage3Scene extends BaseStageScene {
     return 3;
   }
 
-  protected override restartStage() {
+  protected override doRestartStage() {
     this.initPlayer();
   }
 }

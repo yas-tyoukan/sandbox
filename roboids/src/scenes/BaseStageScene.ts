@@ -3,6 +3,8 @@ import { Container, Graphics, Text, Ticker } from 'pixi.js';
 import { FLOOR_HEIGHT, GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
+import { ForceField } from '~/entities/ForceField';
+import { ForceFieldPad } from '~/entities/ForceFieldPad';
 import { Player } from '~/entities/Player';
 import { PowerSquare } from '~/entities/PowerSquare';
 import { TeleportPad } from '~/entities/TeleportPad';
@@ -18,6 +20,7 @@ sound.add('death', 'sounds/death.mp3');
 sound.add('goal', 'sounds/goal.mp3');
 sound.add('jump', 'sounds/jump.mp3');
 sound.add('teleport', 'sounds/teleport.mp3');
+sound.add('force-field', 'sounds/force-field.mp3');
 
 export abstract class BaseStageScene extends Container {
   protected startStage: (level: number, lives: number) => void;
@@ -26,10 +29,12 @@ export abstract class BaseStageScene extends Container {
   protected player!: Player;
   protected enemies: Enemy1[] = [];
   protected platforms: Platform[] = [];
-  protected teleports: TeleportPad[] = [];
+  protected teleportPads: TeleportPad[] = [];
   protected goal!: PowerSquare;
   protected platformYs: number[] = [];
   protected walls: Graphics[] = [];
+  protected forceFields: ForceField[] = [];
+  protected forceFieldPads: ForceFieldPad[] = [];
 
   private statusBar!: Graphics;
   private livesText!: Text;
@@ -212,7 +217,6 @@ export abstract class BaseStageScene extends Container {
           if (this.lives === 0) {
             this.showGameOver();
           } else {
-            this.resetJumpState();
             this.restartStage();
           }
         } else if (this.pauseState === 'clear') {
@@ -263,8 +267,9 @@ export abstract class BaseStageScene extends Container {
         playerRight = this.player.x + rightHalfWidth;
       }
 
-      // 壁との当たり判定
-      for (const wall of this.walls) {
+      // 壁及び・ForceFieldとの当たり判定
+      for (const wall of [...this.walls, ...this.forceFields] as (Graphics | ForceField)[]) {
+        if (wall.visible === false) continue; // ForceFieldは非表示時は無視
         const wallLeft = wall.x;
         const wallRight = wall.x + wall.width;
         const wallBottom = wall.y + wall.height;
@@ -287,25 +292,35 @@ export abstract class BaseStageScene extends Container {
         }
       }
 
-      // TELEPORT判定
-      for (const tp of this.teleports) {
+      // Pad判定
+      for (const p of [...this.teleportPads, ...this.forceFieldPads]) {
         const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
         if (
-          this.player.x + 8 / 2 < tp.x + tp.width / 2 &&
-          this.player.x - 8 / 2 > tp.x - tp.width / 2 &&
-          this.player.y < tp.y &&
-          this.player.y > tp.y - this.player.height &&
+          this.player.x + 8 / 2 < p.x + p.width / 2 &&
+          this.player.x - 8 / 2 > p.x - p.width / 2 &&
+          this.player.y < p.y &&
+          this.player.y > p.y - this.player.height &&
           this.isPlayerOnGround &&
           isSpaceJustPressed
         ) {
-          const to = this.teleports.find((other) => other.id === tp.toId);
-          if (to) {
-            this.startTeleporting({ x: this.player.x, y: this.player.y });
-            this.player.x = to.x;
-            this.player.y = to.y - this.player.height / 2 - 3;
-            this.isPlayerOnGround = true;
-            playSE('teleport');
-            break;
+          if (p instanceof TeleportPad) {
+            // テレポート処理
+            const to = this.teleportPads.find((other) => other.id === p.toId);
+            if (to) {
+              this.startTeleporting({ x: this.player.x, y: this.player.y });
+              this.player.x = to.x;
+              this.player.y = to.y - this.player.height / 2 - 3;
+              this.isPlayerOnGround = true;
+              playSE('teleport');
+              break;
+            }
+          } else if (p instanceof ForceFieldPad) {
+            // ForceField解除処理
+            for (const forceField of this.forceFields) {
+              forceField.visible = !forceField.visible;
+              playSE('force-field');
+              break;
+            }
           }
         }
       }
@@ -350,8 +365,17 @@ export abstract class BaseStageScene extends Container {
     this.prevKeys = { ...this.keys };
   };
 
+  // ステージの再スタート
+  private restartStage() {
+    this.resetJumpState();
+    for (const forceField of this.forceFields) {
+      forceField.visible = true; // ForceFieldを再表示
+    }
+    this.doRestartStage();
+  }
+
   // ステージを最初からやり直し(サブクラスで実装)
-  protected abstract restartStage(): void;
+  protected abstract doRestartStage(): void;
 
   protected async addPlayer({ x, floor }: { x: number; floor: Floor }) {
     this.player = await Player.create();
@@ -363,22 +387,37 @@ export abstract class BaseStageScene extends Container {
 
   protected addTeleportPad(x: number, floor: Floor, id: number, toId: number) {
     TeleportPad.create(x, this.platformYs[floor], id, toId).then((pad) => {
-      this.teleports.push(pad);
+      this.teleportPads.push(pad);
       this.addChild(pad);
     });
   }
 
   protected addWall(x: number, floor: Floor) {
-    // プラットフォーム設計
-    const wallWidth = 8;
-    const wallHeight = FLOOR_HEIGHT;
+    const width = 8;
+    const height = FLOOR_HEIGHT;
     const g = new Graphics();
-    g.rect(0, 0, wallWidth, wallHeight);
+    g.rect(0, 0, width, height);
     g.x = x;
     g.y = this.platformYs[floor] - FLOOR_HEIGHT;
     g.fill(0xffffff);
     this.addChild(g);
     this.walls.push(g);
+  }
+
+  protected async addForceField(x: number, floor: Floor) {
+    const height = FLOOR_HEIGHT;
+    const f = await ForceField.create(height);
+    f.x = x;
+    f.y = this.platformYs[floor] - FLOOR_HEIGHT;
+    this.addChild(f);
+    this.forceFields.push(f);
+  }
+
+  protected async addForceFieldPad(x: number, floor: Floor) {
+    ForceFieldPad.create(x, this.platformYs[floor]).then((pad) => {
+      this.forceFieldPads.push(pad);
+      this.addChild(pad);
+    });
   }
 
   /**
