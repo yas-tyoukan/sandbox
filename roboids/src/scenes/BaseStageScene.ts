@@ -1,12 +1,20 @@
 import { sound } from '@pixi/sound';
 import { Container, Graphics, Text, Ticker } from 'pixi.js';
-import { FLOOR_HEIGHT, GAME_HEIGHT, GAME_WIDTH, PLAYER_SPEED } from '~/constants/gameConfig';
+import {
+  FLOOR_HEIGHT,
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  PLAYER_SPEED,
+  SLEEP_TIME,
+} from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
+import { Enemy3 } from '~/entities/Enemy3';
 import { ForceField } from '~/entities/ForceField';
 import { ForceFieldPad } from '~/entities/ForceFieldPad';
 import { Player } from '~/entities/Player';
 import { PowerSquare } from '~/entities/PowerSquare';
+import { SleepPad } from '~/entities/SleepPad';
 import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction } from '~/types';
 import { playSE } from '~/utils/playSE';
@@ -35,6 +43,7 @@ export abstract class BaseStageScene extends Container {
   protected walls: Graphics[] = [];
   protected forceFields: ForceField[] = [];
   protected forceFieldPads: ForceFieldPad[] = [];
+  protected sleepPads: SleepPad[] = [];
 
   private statusBar!: Graphics;
   private livesText!: Text;
@@ -60,6 +69,11 @@ export abstract class BaseStageScene extends Container {
   private velocityY = 0;
   private jumpBuffered = false;
   private wasOnGround = false; // 前フレームの着地状態
+
+  // sleep状態管理
+  private asleep = false;
+  private sleepCount = 0;
+  private sleepTimer: number | null = null;
 
   constructor({
     startStage,
@@ -293,7 +307,7 @@ export abstract class BaseStageScene extends Container {
       }
 
       // Pad判定
-      for (const p of [...this.teleportPads, ...this.forceFieldPads]) {
+      for (const p of [...this.teleportPads, ...this.forceFieldPads, ...this.sleepPads]) {
         const isSpaceJustPressed = this.keys['Space'] && !this.prevKeys['Space'];
         if (
           this.player.x + 8 / 2 < p.x + p.width / 2 &&
@@ -317,10 +331,16 @@ export abstract class BaseStageScene extends Container {
           } else if (p instanceof ForceFieldPad) {
             // ForceField解除処理
             for (const forceField of this.forceFields) {
+              if (forceField.id !== p.targetId) {
+                continue;
+              }
+              // 対象のForceFieldを見つけて表示切替
               forceField.visible = !forceField.visible;
               playSE('force-field');
               break;
             }
+          } else if (p instanceof SleepPad) {
+            this.startSleep();
           }
         }
       }
@@ -354,8 +374,10 @@ export abstract class BaseStageScene extends Container {
     }
 
     // Enemyの移動
-    for (const enemy of this.enemies) {
-      enemy.updateMove();
+    if (!this.asleep) {
+      for (const enemy of this.enemies) {
+        enemy.updateMove();
+      }
     }
 
     // ステータスバー更新
@@ -365,12 +387,50 @@ export abstract class BaseStageScene extends Container {
     this.prevKeys = { ...this.keys };
   };
 
+  // sleep処理
+  private startSleep() {
+    this.asleep = true;
+    this.stopEnemies();
+    if (this.sleepTimer !== null) {
+      clearTimeout(this.sleepTimer);
+      this.sleepTimer = null;
+    }
+    this.sleepTimer = setTimeout(() => {
+      this.asleep = false;
+      this.sleepTimer = null;
+      this.playEnemies();
+    }, SLEEP_TIME);
+  }
+
+  private stopSleep() {
+    this.asleep = false;
+    if (this.sleepTimer !== null) {
+      clearTimeout(this.sleepTimer);
+      this.sleepTimer = null;
+    }
+  }
+
+  private stopEnemies() {
+    for (const enemy of this.enemies) {
+      enemy.stop();
+    }
+  }
+
+  private playEnemies() {
+    for (const enemy of this.enemies) {
+      enemy.play();
+    }
+  }
+
   // ステージの再スタート
   private restartStage() {
     this.resetJumpState();
     for (const forceField of this.forceFields) {
       forceField.visible = true; // ForceFieldを再表示
     }
+    // sleep状態リセット
+    this.stopSleep();
+    // 各ステージごとのリセット処理
     this.doRestartStage();
   }
 
@@ -385,11 +445,16 @@ export abstract class BaseStageScene extends Container {
     this.addChild(this.player);
   }
 
-  protected addTeleportPad(x: number, floor: Floor, id: number, toId: number) {
-    TeleportPad.create(x, this.platformYs[floor], id, toId).then((pad) => {
-      this.teleportPads.push(pad);
-      this.addChild(pad);
-    });
+  protected async addTeleportPad(x: number, floor: Floor, id: number, toId: number) {
+    const pad = await TeleportPad.create(x, this.platformYs[floor], id, toId);
+    this.teleportPads.push(pad);
+    this.addChild(pad);
+  }
+
+  protected async addSleepPad(x: number, floor: Floor) {
+    const pad = await SleepPad.create(x, this.platformYs[floor]);
+    this.sleepPads.push(pad);
+    this.addChild(pad);
   }
 
   protected addWall(x: number, floor: Floor) {
@@ -404,20 +469,19 @@ export abstract class BaseStageScene extends Container {
     this.walls.push(g);
   }
 
-  protected async addForceField(x: number, floor: Floor) {
+  protected async addForceField(x: number, floor: Floor, id: number) {
     const height = FLOOR_HEIGHT;
-    const f = await ForceField.create(height);
+    const f = await ForceField.create(height, id);
     f.x = x;
     f.y = this.platformYs[floor] - FLOOR_HEIGHT;
-    this.addChild(f);
+    this.addChildAt(f, 0);
     this.forceFields.push(f);
   }
 
-  protected async addForceFieldPad(x: number, floor: Floor) {
-    ForceFieldPad.create(x, this.platformYs[floor]).then((pad) => {
-      this.forceFieldPads.push(pad);
-      this.addChild(pad);
-    });
+  protected async addForceFieldPad(x: number, floor: Floor, targetId: number) {
+    const pad = await ForceFieldPad.create(x, this.platformYs[floor], targetId);
+    this.forceFieldPads.push(pad);
+    this.addChild(pad);
   }
 
   /**
@@ -469,6 +533,34 @@ export abstract class BaseStageScene extends Container {
         this.enemies.push(enemy);
         this.addChild(enemy);
       }
+    }
+  }
+
+  /**
+   * Enemy3を追加するメソッド
+   * @param args
+   * @protected
+   */
+  protected async addEnemy3(
+    args: {
+      x: number;
+      floor: Floor;
+      bound: Bound;
+      direction: Direction;
+    }[],
+  ) {
+    const length = args.length;
+    const enemies = await Promise.all(
+      args.map(({ bound, direction }) => Enemy3.create({ bound, direction })),
+    );
+    for (let i = 0; i < length; i++) {
+      const enemy = enemies[i];
+      const { x, floor } = args[i];
+      enemy.x = x;
+      enemy.y = this.platformYs[floor] - 24;
+      enemy.anchor.set(0.5, 0.5);
+      this.enemies.push(enemy);
+      this.addChild(enemy);
     }
   }
 

@@ -18,8 +18,8 @@ export class Stage3Scene extends BaseStageScene {
     this.addTeleportPad(margin, 0, 0, 2);
     this.addTeleportPad(margin, 1, 1, 0);
     this.addTeleportPad(margin, 2, 2, 1);
-    this.addForceFieldPad(GAME_WIDTH - margin, 1);
-    this.addForceField(424, 2);
+    this.addForceFieldPad(GAME_WIDTH - margin, 1, 0);
+    this.addForceField(424, 2, 0);
 
     this.addEnemy2([
       {

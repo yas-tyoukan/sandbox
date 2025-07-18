@@ -3,8 +3,10 @@ import * as PIXI from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL } from '~/constants/gameConfig';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
 import { Stage2Scene } from '~/scenes/Stage2Scene';
+import { Stage3Scene } from '~/scenes/Stage3Scene';
+import { Stage4Scene } from '~/scenes/Stage4Scene';
+import { Stage5Scene } from '~/scenes/Stage5Scene';
 import { TitleScene } from '~/scenes/TitleScene';
-import { Stage3Scene } from './scenes/Stage3Scene';
 
 async function main() {
   const app = new PIXI.Application();
@@ -51,6 +53,10 @@ async function main() {
           return new Stage2Scene(args);
         case 3:
           return new Stage3Scene(args);
+        case 4:
+          return new Stage4Scene(args);
+        case 5:
+          return new Stage5Scene(args);
         default:
           throw new Error(`Unknown level: ${level}`);
       }

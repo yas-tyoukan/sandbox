@@ -3,10 +3,10 @@ import { sound } from '@pixi/sound';
 // 音声エフェクトの優先度を定義
 const SE_PRIORITY: { [key: string]: number } = {
   goal: 3,
-  death: 3,
-  jump: 2,
-  'force-field': 2,
+  death: 2,
   teleport: 2,
+  'force-field': 2,
+  jump: 2,
   beam: 1,
 };
 

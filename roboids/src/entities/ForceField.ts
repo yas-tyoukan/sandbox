@@ -3,12 +3,13 @@ import { AnimatedSprite, Assets, Container, type Spritesheet, type Texture } fro
 export class ForceField extends Container {
   private sprites: AnimatedSprite[] = [];
   private static FRAME_HEIGHT = 6; // 1段の高さ（px）
+  public readonly id: number; // ForceFieldのID
   /**
    * ForceFieldクラスのコンストラクタ
    * @param frames - アニメーションフレームのテクスチャ配列
    * @param height - ForceFieldの高さ
    */
-  private constructor(frames: Texture[], height: number) {
+  private constructor(frames: Texture[], height: number, id: number) {
     super();
     const count = Math.ceil(height / ForceField.FRAME_HEIGHT);
     for (let i = 0; i < count; i++) {
@@ -22,12 +23,13 @@ export class ForceField extends Container {
     }
     this.width = frames[0].width;
     this.height = height;
+    this.id = id;
   }
-  static async create(height: number): Promise<ForceField> {
+  static async create(height: number, id: number): Promise<ForceField> {
     const sheet: Spritesheet = await Assets.load('/images/force-field.json');
     const frames = Object.keys(sheet.textures)
       .sort()
       .map((name) => sheet.textures[name]);
-    return new ForceField(frames, height);
+    return new ForceField(frames, height, id);
   }
 }
