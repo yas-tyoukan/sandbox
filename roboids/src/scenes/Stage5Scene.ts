@@ -25,6 +25,39 @@ export class Stage5Scene extends BaseStageScene {
     this.addSleepPad(GAME_WIDTH - 55, 2);
     this.addWall(GAME_WIDTH - 170, 2);
 
+    this.addEnemy1([
+      {
+        x: 119,
+        floor: 2,
+        bound: {
+          leftMin: 74,
+          leftMax: 304,
+          right: 304,
+        },
+        direction: 1,
+      },
+      {
+        x: 138,
+        floor: 1,
+        bound: {
+          leftMin: 138,
+          leftMax: 303,
+          right: 303,
+        },
+        direction: 1,
+      },
+      {
+        x: GAME_WIDTH - 142,
+        floor: 1,
+        bound: {
+          leftMin: GAME_WIDTH - 142,
+          leftMax: GAME_WIDTH - 27,
+          right: GAME_WIDTH - 27,
+        },
+        direction: 1,
+      },
+    ]);
+
     this.addEnemy3([
       // {
       //   x: 38,
@@ -66,7 +99,7 @@ export class Stage5Scene extends BaseStageScene {
   }
 
   protected override getStageNumber(): number {
-    return 4;
+    return 5;
   }
 
   protected override doRestartStage() {
