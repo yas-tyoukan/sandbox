@@ -35,15 +35,15 @@ export class Stage5Scene extends BaseStageScene {
       //   },
       //   direction: 1,
       // },
-      {
-        x: 100,
-        floor: 1,
-        bound: {
-          left: 38,
-          right: 244,
-        },
-        direction: -1,
-      },
+      // {
+      //   x: 100,
+      //   floor: 1,
+      //   bound: {
+      //     left: 38,
+      //     right: 244,
+      //   },
+      //   direction: -1,
+      // },
       {
         x: 38,
         floor: 0,

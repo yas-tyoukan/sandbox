@@ -263,20 +263,20 @@ export abstract class BaseStageScene extends Container {
       const anchorX = this.player.anchor?.x ?? 0.5;
       const halfWidth = this.player.width * anchorX;
       const rightHalfWidth = this.player.width * (1 - anchorX);
-      const offset = 8;
+      const wallOffset = 8;
 
       // プレイヤーのx方向範囲
       let playerLeft = this.player.x - halfWidth;
       let playerRight = this.player.x + rightHalfWidth;
 
       // 画面端の判定
-      if (playerLeft < offset) {
-        this.player.x = halfWidth + offset;
+      if (playerLeft < wallOffset) {
+        this.player.x = halfWidth + wallOffset;
         playerLeft = this.player.x - halfWidth;
         playerRight = this.player.x + rightHalfWidth;
       }
-      if (playerRight > GAME_WIDTH - offset) {
-        this.player.x = GAME_WIDTH - rightHalfWidth - offset;
+      if (playerRight > GAME_WIDTH - wallOffset) {
+        this.player.x = GAME_WIDTH - rightHalfWidth - wallOffset;
         playerLeft = this.player.x - halfWidth;
         playerRight = this.player.x + rightHalfWidth;
       }
@@ -287,14 +287,28 @@ export abstract class BaseStageScene extends Container {
         const wallLeft = wall.x;
         const wallRight = wall.x + wall.width;
         const wallBottom = wall.y + wall.height;
+        if (wall instanceof ForceField && this.keys['Space']) {
+          console.log(
+            `ForceField at (${wall.x}, ${wall.y}) with ID ${wall.id} is visible: ${wall.visible}`,
+            this.player.x,
+            this.player.y,
+          );
+        }
         // 同じフロアの壁かどうか
-        if (wallBottom < this.player.y || this.player.y < wallBottom - FLOOR_HEIGHT) break;
+        if (wallBottom < this.player.y || this.player.y < wallBottom - FLOOR_HEIGHT) continue;
+
+        const isForceField = wall instanceof ForceField;
+        const offset = isForceField ? 0 : wallOffset;
 
         // x軸だけのAABB判定
         if (playerRight + offset > wallLeft && playerLeft - offset < wallRight) {
           // どちらからめり込んだか判定
           const overlapLeft = playerRight - wallLeft;
           const overlapRight = wallRight - playerLeft;
+          if (isForceField) {
+            // ForceFieldにぶつかった場合は死亡
+            this.startDead();
+          }
           if (overlapLeft < overlapRight) {
             // 左からぶつかった
             this.player.x -= overlapLeft + offset;
@@ -302,7 +316,6 @@ export abstract class BaseStageScene extends Container {
             // 右からぶつかった
             this.player.x += overlapRight + offset;
           }
-          break;
         }
       }
 
@@ -363,12 +376,7 @@ export abstract class BaseStageScene extends Container {
     // 敵との当たり判定
     for (const enemy of this.enemies) {
       if (enemy.isHitPlayer(this.player)) {
-        this.lives--;
-        this.updateStatusBar();
-        this.pauseState = 'death';
-        this.pauseTimer = 30;
-        this.resetTeleporting();
-        playSE('death');
+        this.startDead();
         return;
       }
     }
@@ -386,6 +394,17 @@ export abstract class BaseStageScene extends Container {
     // 最後に前フレームのキー状態を更新
     this.prevKeys = { ...this.keys };
   };
+
+  // プレイヤー死亡時の処理
+  private startDead() {
+    this.lives--;
+    this.updateStatusBar();
+    this.pauseState = 'death';
+    this.pauseTimer = 30;
+    this.resetTeleporting();
+    this.stopSleep();
+    playSE('death');
+  }
 
   // sleep処理
   private startSleep() {
