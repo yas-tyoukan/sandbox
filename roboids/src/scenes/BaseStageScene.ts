@@ -10,6 +10,7 @@ import {
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
 import { Enemy3 } from '~/entities/Enemy3';
+import { Enemy4 } from '~/entities/Enemy4';
 import { ForceField } from '~/entities/ForceField';
 import { ForceFieldPad } from '~/entities/ForceFieldPad';
 import { Player } from '~/entities/Player';
@@ -287,13 +288,6 @@ export abstract class BaseStageScene extends Container {
         const wallLeft = wall.x;
         const wallRight = wall.x + wall.width;
         const wallBottom = wall.y + wall.height;
-        if (wall instanceof ForceField && this.keys['Space']) {
-          console.log(
-            `ForceField at (${wall.x}, ${wall.y}) with ID ${wall.id} is visible: ${wall.visible}`,
-            this.player.x,
-            this.player.y,
-          );
-        }
         // 同じフロアの壁かどうか
         if (wallBottom < this.player.y || this.player.y < wallBottom - FLOOR_HEIGHT) continue;
 
@@ -478,11 +472,11 @@ export abstract class BaseStageScene extends Container {
 
   protected addWall(x: number, floor: Floor) {
     const width = 8;
-    const height = FLOOR_HEIGHT;
+    const height = FLOOR_HEIGHT - 8;
     const g = new Graphics();
     g.rect(0, 0, width, height);
     g.x = x;
-    g.y = this.platformYs[floor] - FLOOR_HEIGHT;
+    g.y = this.platformYs[floor] - FLOOR_HEIGHT + 8;
     g.fill(0xffffff);
     this.addChild(g);
     this.walls.push(g);
@@ -504,12 +498,13 @@ export abstract class BaseStageScene extends Container {
   }
 
   /**
-   * Enemy1を追加するメソッド
+   * 敵を追加するメソッド
    * @param args
    * @protected
    */
-  protected async addEnemy1(
+  protected async addEnemies(
     args: {
+      type: 1 | 2 | 3 | 4;
       x: number;
       floor: Floor;
       bound: Bound;
@@ -518,59 +513,16 @@ export abstract class BaseStageScene extends Container {
   ) {
     const length = args.length;
     const enemies = await Promise.all(
-      args.map(({ bound, direction }) => Enemy1.create({ bound, direction })),
-    );
-    for (let i = 0; i < length; i++) {
-      const enemy = enemies[i];
-      const { x, floor } = args[i];
-      enemy.x = x;
-      enemy.y = this.platformYs[floor] - 24;
-      enemy.anchor.set(0.5, 0.5);
-      this.enemies.push(enemy);
-      this.addChild(enemy);
-    }
-  }
-
-  /**
-   * Enemy2を追加するメソッド
-   * @param args
-   */
-  protected async addEnemy2(
-    args: {
-      x: number;
-      floor: Floor;
-      bound: Bound;
-      direction: Direction;
-    }[],
-  ) {
-    for (const { x, floor, bound, direction } of args) {
-      const enemies = await Promise.all([Enemy2.create({ bound, direction })]);
-      for (const enemy of enemies) {
-        enemy.x = x;
-        enemy.y = this.platformYs[floor] - 24;
-        enemy.anchor.set(0.5, 0.5);
-        this.enemies.push(enemy);
-        this.addChild(enemy);
-      }
-    }
-  }
-
-  /**
-   * Enemy3を追加するメソッド
-   * @param args
-   * @protected
-   */
-  protected async addEnemy3(
-    args: {
-      x: number;
-      floor: Floor;
-      bound: Bound;
-      direction: Direction;
-    }[],
-  ) {
-    const length = args.length;
-    const enemies = await Promise.all(
-      args.map(({ bound, direction }) => Enemy3.create({ bound, direction })),
+      args.map(({ type, bound, direction }) => {
+        const EnemyClass = (() => {
+          if (type === 1) return Enemy1;
+          if (type === 2) return Enemy2;
+          if (type === 3) return Enemy3;
+          if (type === 4) return Enemy4;
+          throw new Error(`Unknown enemy type: ${type}`);
+        })();
+        return EnemyClass.create({ bound, direction });
+      }),
     );
     for (let i = 0; i < length; i++) {
       const enemy = enemies[i];

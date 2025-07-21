@@ -6,6 +6,7 @@ import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { Stage3Scene } from '~/scenes/Stage3Scene';
 import { Stage4Scene } from '~/scenes/Stage4Scene';
 import { Stage5Scene } from '~/scenes/Stage5Scene';
+import { Stage6Scene } from '~/scenes/Stage6Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 
 async function main() {
@@ -57,6 +58,8 @@ async function main() {
           return new Stage4Scene(args);
         case 5:
           return new Stage5Scene(args);
+        case 6:
+          return new Stage6Scene(args);
         default:
           throw new Error(`Unknown level: ${level}`);
       }

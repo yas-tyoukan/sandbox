@@ -5,5 +5,6 @@ export const PLAYER_SPEED = 4.4;
 export const ENEMY1_SPEED = 5;
 export const ENEMY2_SPEED = 5;
 export const ENEMY3_SPEED = 5.65;
-export const START_LEVEL = 5;
+export const ENEMY4_SPEED = 5;
+export const START_LEVEL = 6;
 export const SLEEP_TIME = 7000; // SLEEP PADでスリープする時間(ミリ秒)

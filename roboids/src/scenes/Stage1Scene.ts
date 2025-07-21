@@ -21,8 +21,9 @@ export class Stage1Scene extends BaseStageScene {
     this.addTeleportPad(margin, 2, 3, 2);
 
     // Enemy1の配置（各段中央付近で左右移動）
-    this.addEnemy1([
+    this.addEnemies([
       {
+        type: 1,
         x: 100,
         floor: 0,
         bound: {
@@ -32,6 +33,7 @@ export class Stage1Scene extends BaseStageScene {
         direction: 1,
       }, // 最下段
       {
+        type: 1,
         x: GAME_WIDTH / 2,
         floor: 1,
         bound: {
@@ -41,6 +43,7 @@ export class Stage1Scene extends BaseStageScene {
         direction: -1,
       }, // 中段
       {
+        type: 1,
         x: 50,
         floor: 2,
         bound: {

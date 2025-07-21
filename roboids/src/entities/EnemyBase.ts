@@ -43,7 +43,8 @@ export abstract class EnemyBase extends AnimatedSprite {
   }
 
   private getRandomInRange(min: number, max: number): number {
-    return Math.random() * (max - min) + min;
+    const step = 5; // 5px単位でランダム
+    return min + step * Math.floor(Math.random() * (Math.floor((max - min) / step) + 1));
   }
   private resetLeftBound() {
     this.leftBound = this.getRandomInRange(this.leftBoundMin, this.leftBoundMax);

@@ -24,6 +24,7 @@ export class ForceField extends Container {
     this.width = frames[0].width;
     this.height = height;
     this.id = id;
+    this.pivot.set(this.width / 2, 0);
   }
   static async create(height: number, id: number): Promise<ForceField> {
     const sheet: Spritesheet = await Assets.load('/images/force-field.json');

@@ -25,8 +25,9 @@ export class Stage4Scene extends BaseStageScene {
     this.addForceField(274, 1, 0);
     this.addWall(362, 1);
 
-    this.addEnemy1([
+    this.addEnemies([
       {
+        type: 1,
         x: 38,
         floor: 2,
         bound: {
@@ -36,6 +37,7 @@ export class Stage4Scene extends BaseStageScene {
         direction: 1,
       },
       {
+        type: 1,
         x: 100,
         floor: 1,
         bound: {
@@ -45,6 +47,7 @@ export class Stage4Scene extends BaseStageScene {
         direction: -1,
       },
       {
+        type: 1,
         x: 38,
         floor: 0,
         bound: {
@@ -54,6 +57,7 @@ export class Stage4Scene extends BaseStageScene {
         direction: 1,
       },
       {
+        type: 1,
         x: GAME_WIDTH - 30,
         floor: 0,
         bound: {

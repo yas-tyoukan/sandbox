@@ -25,8 +25,9 @@ export class Stage2Scene extends BaseStageScene {
     this.addWall(116, 0);
 
     // Enemy1の配置（各段中央付近で左右移動）
-    this.addEnemy1([
+    this.addEnemies([
       {
+        type: 1,
         x: 320,
         floor: 0,
         bound: {
@@ -36,18 +37,18 @@ export class Stage2Scene extends BaseStageScene {
         direction: -1,
       }, // 最下段
       {
+        type: 1,
         x: 266,
         floor: 1,
         bound: {
-          leftMin: 64,
-          leftMax: GAME_WIDTH - 70,
+          leftMin: 63,
+          leftMax: GAME_WIDTH - 15,
           right: GAME_WIDTH - 10,
         },
         direction: -1,
       }, // 中段
-    ]);
-    this.addEnemy2([
       {
+        type: 2,
         x: 266,
         floor: 2,
         bound: {
