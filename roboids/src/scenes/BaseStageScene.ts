@@ -439,7 +439,7 @@ export abstract class BaseStageScene extends Container {
   private restartStage() {
     this.resetJumpState();
     for (const forceField of this.forceFields) {
-      forceField.visible = true; // ForceFieldを再表示
+      forceField.initialize(); // ForceFieldを初期状態にする
     }
     // sleep状態リセット
     this.stopSleep();
@@ -482,9 +482,9 @@ export abstract class BaseStageScene extends Container {
     this.walls.push(g);
   }
 
-  protected async addForceField(x: number, floor: Floor, id: number) {
+  protected async addForceField(x: number, floor: Floor, id: number, visible = true) {
     const height = FLOOR_HEIGHT;
-    const f = await ForceField.create(height, id);
+    const f = await ForceField.create(height, id, visible);
     f.x = x;
     f.y = this.platformYs[floor] - FLOOR_HEIGHT;
     this.addChildAt(f, 0);
