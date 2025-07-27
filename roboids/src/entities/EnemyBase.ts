@@ -11,6 +11,7 @@ export abstract class EnemyBase extends AnimatedSprite {
   protected rightBoundMax: number;
   protected direction: number;
   protected speed: number;
+  protected spriteSheet: Spritesheet;
 
   protected constructor(
     spriteSheet: Spritesheet,
@@ -36,7 +37,7 @@ export abstract class EnemyBase extends AnimatedSprite {
     this.rightBoundMax = rightMax ?? right ?? 0;
 
     this.speed = speed;
-
+    this.spriteSheet = spriteSheet;
     this.direction = direction;
     this.leftBound = this.leftBoundMin;
     this.rightBound = this.rightBoundMax;

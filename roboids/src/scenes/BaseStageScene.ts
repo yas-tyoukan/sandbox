@@ -11,6 +11,7 @@ import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
 import { Enemy3 } from '~/entities/Enemy3';
 import { Enemy4 } from '~/entities/Enemy4';
+import { Enemy5 } from '~/entities/Enemy5';
 import { ForceField } from '~/entities/ForceField';
 import { ForceFieldPad } from '~/entities/ForceFieldPad';
 import { Player } from '~/entities/Player';
@@ -355,6 +356,8 @@ export abstract class BaseStageScene extends Container {
 
       // ゴール判定
       if (
+        this.goal &&
+        this.player &&
         this.player.x + this.player.width > this.goal.x &&
         this.player.x < this.goal.x + this.goal.width &&
         this.player.y + this.player.height > this.goal.y &&
@@ -504,7 +507,7 @@ export abstract class BaseStageScene extends Container {
    */
   protected async addEnemies(
     args: {
-      type: 1 | 2 | 3 | 4;
+      type: 1 | 2 | 3 | 4 | 5;
       x: number;
       floor: Floor;
       bound: Bound;
@@ -519,6 +522,7 @@ export abstract class BaseStageScene extends Container {
           if (type === 2) return Enemy2;
           if (type === 3) return Enemy3;
           if (type === 4) return Enemy4;
+          if (type === 5) return Enemy5;
           throw new Error(`Unknown enemy type: ${type}`);
         })();
         return EnemyClass.create({ bound, direction });
