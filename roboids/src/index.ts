@@ -8,7 +8,6 @@ import { Stage4Scene } from '~/scenes/Stage4Scene';
 import { Stage5Scene } from '~/scenes/Stage5Scene';
 import { Stage6Scene } from '~/scenes/Stage6Scene';
 import { Stage7Scene } from '~/scenes/Stage7Scene';
-import { Stage8Scene } from '~/scenes/Stage8Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 
 async function main() {
@@ -36,6 +35,57 @@ async function main() {
     sound.add('title', { url: 'sounds/title.mp3', autoPlay: true });
   }
 
+  function calcStagePattern(level: number): [number, number] {
+    let stagePattern = 1;
+    let enemyPattern = 0;
+    for (let i = 1; i < level; i++) {
+      if (stagePattern !== 7) {
+        stagePattern += 1;
+      } else if ((i - 15) % 19 === 0) {
+        stagePattern = 2;
+      } else if ((i - 13) % 19 === 0) {
+        enemyPattern += 1;
+      } else if ((i - 14) % 19 !== 0) {
+        enemyPattern += 1;
+        stagePattern = 2;
+      } else {
+        stagePattern = 2;
+      }
+    }
+    switch (stagePattern) {
+      case 1: {
+        enemyPattern = 0;
+        break;
+      }
+      case 2: {
+        enemyPattern = enemyPattern % 3;
+        break;
+      }
+      case 3: {
+        enemyPattern = enemyPattern % 2;
+        break;
+      }
+      case 4: {
+        enemyPattern = enemyPattern % 3;
+        break;
+      }
+      case 5: {
+        enemyPattern = enemyPattern % 3;
+        break;
+      }
+      case 6: {
+        enemyPattern = enemyPattern % 3;
+        break;
+      }
+      case 7: {
+        enemyPattern = enemyPattern % 4;
+        break;
+      }
+      default:
+    }
+    return [stagePattern, enemyPattern];
+  }
+
   function startStage(level = 1, lives = 1004) {
     if (currentScene) {
       app.stage.removeChild(currentScene);
@@ -44,12 +94,15 @@ async function main() {
     }
     // 例: Stage1Sceneをここで生成してaddChild
     const stage = (() => {
+      const [stage, pattern] = calcStagePattern(level);
       const args = {
         startStage,
         lives,
         showTitle,
+        level,
+        pattern,
       };
-      switch (level) {
+      switch (stage) {
         case 1:
           return new Stage1Scene(args);
         case 2:
@@ -64,10 +117,8 @@ async function main() {
           return new Stage6Scene(args);
         case 7:
           return new Stage7Scene(args);
-        case 8:
-          return new Stage8Scene(args);
         default:
-          throw new Error(`Unknown level: ${level}`);
+          throw new Error(`Unknown stage ${stage}, level: ${level}`);
       }
     })();
     currentScene = stage;

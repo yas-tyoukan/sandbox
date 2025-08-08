@@ -51,7 +51,7 @@ export class Stage4Scene extends BaseStageScene {
         x: 38,
         floor: 0,
         bound: {
-          left: 96,
+          left: 38,
           right: 242,
         },
         direction: 1,
@@ -62,15 +62,11 @@ export class Stage4Scene extends BaseStageScene {
         floor: 0,
         bound: {
           left: GAME_WIDTH - 242,
-          right: GAME_WIDTH - 242,
+          right: GAME_WIDTH - 30,
         },
         direction: -1,
       },
     ]);
-  }
-
-  protected override getStageNumber(): number {
-    return 4;
   }
 
   protected override doRestartStage() {

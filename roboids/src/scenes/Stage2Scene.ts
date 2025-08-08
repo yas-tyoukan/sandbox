@@ -1,5 +1,6 @@
 import { GAME_WIDTH } from '~/constants/gameConfig';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
+import type { EnemyType } from '~/types';
 
 export class Stage2Scene extends BaseStageScene {
   protected override async initPlayer() {
@@ -13,7 +14,7 @@ export class Stage2Scene extends BaseStageScene {
     // ゴールマーカー設置
     this.addGoal(100, 0);
   }
-  protected async initStage() {
+  protected async initStage(pattern: number) {
     const margin = 54;
     this.addTeleportPad(GAME_WIDTH - margin, 0, 0, 1);
     this.addTeleportPad(GAME_WIDTH - margin, 1, 1, 0);
@@ -24,10 +25,16 @@ export class Stage2Scene extends BaseStageScene {
 
     this.addWall(116, 0);
 
+    const enemyTypes: EnemyType[][] = [
+      [1, 1, 2],
+      [5, 5, 2],
+      [1, 3, 2],
+    ];
+
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemies([
       {
-        type: 1,
+        type: enemyTypes[pattern][0],
         x: 320,
         floor: 0,
         bound: {
@@ -37,7 +44,7 @@ export class Stage2Scene extends BaseStageScene {
         direction: -1,
       }, // 最下段
       {
-        type: 1,
+        type: enemyTypes[pattern][1],
         x: 266,
         floor: 1,
         bound: {
@@ -48,7 +55,7 @@ export class Stage2Scene extends BaseStageScene {
         direction: -1,
       }, // 中段
       {
-        type: 2,
+        type: enemyTypes[pattern][2],
         x: 266,
         floor: 2,
         bound: {
@@ -58,10 +65,6 @@ export class Stage2Scene extends BaseStageScene {
         direction: 1,
       }, // 最上段
     ]);
-  }
-
-  protected override getStageNumber(): number {
-    return 2;
   }
 
   protected override doRestartStage() {

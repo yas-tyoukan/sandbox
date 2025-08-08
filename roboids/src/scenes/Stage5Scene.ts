@@ -84,10 +84,6 @@ export class Stage5Scene extends BaseStageScene {
     ]);
   }
 
-  protected override getStageNumber(): number {
-    return 5;
-  }
-
   protected override doRestartStage() {
     this.initPlayer();
   }

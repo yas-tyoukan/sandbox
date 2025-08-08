@@ -18,7 +18,7 @@ import { Player } from '~/entities/Player';
 import { PowerSquare } from '~/entities/PowerSquare';
 import { SleepPad } from '~/entities/SleepPad';
 import { TeleportPad } from '~/entities/TeleportPad';
-import type { Bound, Direction } from '~/types';
+import type { Bound, Direction, EnemyType } from '~/types';
 import { playSE } from '~/utils/playSE';
 
 type Platform = { x: number; y: number; width: number; height: number };
@@ -51,6 +51,7 @@ export abstract class BaseStageScene extends Container {
   private livesText!: Text;
   private levelText!: Text;
   private gameOverModal?: Container;
+  private level: number; // 現在のレベル（ステージ番号）
 
   // キー入力管理
   protected keys: Record<string, boolean> = {};
@@ -81,27 +82,31 @@ export abstract class BaseStageScene extends Container {
     startStage,
     lives = 4,
     showTitle,
+    pattern,
+    level,
   }: {
     startStage: (level: number, lives: number) => void;
     lives: number;
     showTitle: () => void;
+    pattern: number; // ステージのパターン番号（サブクラスで使用）
+    level: number;
   }) {
     super();
     this.startStage = startStage;
     this.lives = lives;
+    this.level = level;
     this.showTitle = showTitle;
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     this.createStageBase();
-    Promise.all([this.initStage(), this.initPlayer(), this.initGoal()]).then(() => {
+    Promise.all([this.initStage(pattern), this.initPlayer(), this.initGoal()]).then(() => {
       Ticker.shared.add(this.update, this);
     });
   }
 
   // ステージ固有の初期化（サブクラスで実装）
-  protected abstract initStage(): void;
+  protected abstract initStage(patten: number): void;
   protected abstract initPlayer(): Promise<void>;
-  protected abstract getStageNumber(): number;
   protected abstract initGoal(): Promise<void>;
 
   private createStageBase() {
@@ -155,7 +160,7 @@ export abstract class BaseStageScene extends Container {
 
     // Level表示（左下）
     this.levelText = new Text({
-      text: `Level: ${this.getStageNumber()}`,
+      text: `Level: ${this.level}`,
       style: {
         fontFamily: 'monospace',
         fontSize: 14,
@@ -190,7 +195,7 @@ export abstract class BaseStageScene extends Container {
   }
 
   private updateStatusBar() {
-    this.levelText.text = `Level: ${this.getStageNumber()}`;
+    this.levelText.text = `Level: ${this.level}`;
     this.livesText.text = `Robots: ${this.lives}`;
   }
 
@@ -236,7 +241,7 @@ export abstract class BaseStageScene extends Container {
             this.restartStage();
           }
         } else if (this.pauseState === 'clear') {
-          this.startStage(this.getStageNumber() + 1, this.lives);
+          this.startStage(this.level + 1, this.lives);
         }
         this.pauseState = 'none';
       }
@@ -507,7 +512,7 @@ export abstract class BaseStageScene extends Container {
    */
   protected async addEnemies(
     args: {
-      type: 1 | 2 | 3 | 4 | 5;
+      type: EnemyType;
       x: number;
       floor: Floor;
       bound: Bound;
