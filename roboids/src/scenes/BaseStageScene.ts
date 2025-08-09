@@ -113,8 +113,8 @@ export abstract class BaseStageScene extends Container {
     // ステージの基本設計
     // 枠線
     const border = new Graphics();
-    border.rect(1, 1, GAME_WIDTH - 1, GAME_HEIGHT - 1);
-    border.stroke({ width: 1, color: 0xffffff });
+    border.rect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    border.stroke({ width: 2, color: 0xffffff });
     this.addChild(border);
     // ステータスバーの追加
     this.createStatusBar();
@@ -479,7 +479,7 @@ export abstract class BaseStageScene extends Container {
   }
 
   protected addWall(x: number, floor: Floor) {
-    const width = 8;
+    const width = 7;
     const height = FLOOR_HEIGHT - 8;
     const g = new Graphics();
     g.rect(0, 0, width, height);
