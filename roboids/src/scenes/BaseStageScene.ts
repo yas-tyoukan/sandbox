@@ -21,6 +21,14 @@ import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction, EnemyType } from '~/types';
 import { playSE } from '~/utils/playSE';
 
+export type EnemyArg = {
+  type: EnemyType;
+  x: number;
+  floor: Floor;
+  bound: Bound;
+  direction: Direction;
+};
+
 type Platform = { x: number; y: number; width: number; height: number };
 
 type PauseState = 'none' | 'death' | 'clear';
@@ -510,15 +518,7 @@ export abstract class BaseStageScene extends Container {
    * @param args
    * @protected
    */
-  protected async addEnemies(
-    args: {
-      type: EnemyType;
-      x: number;
-      floor: Floor;
-      bound: Bound;
-      direction: Direction;
-    }[],
-  ) {
+  protected async addEnemies(args: EnemyArg[]) {
     const length = args.length;
     const enemies = await Promise.all(
       args.map(({ type, bound, direction }) => {
