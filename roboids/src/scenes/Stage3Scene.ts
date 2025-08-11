@@ -1,5 +1,5 @@
 import { GAME_WIDTH } from '~/constants/gameConfig';
-import { BaseStageScene } from '~/scenes/BaseStageScene';
+import { BaseStageScene, type EnemyArg } from '~/scenes/BaseStageScene';
 import type { EnemyType } from '~/types';
 
 export class Stage3Scene extends BaseStageScene {
@@ -8,59 +8,93 @@ export class Stage3Scene extends BaseStageScene {
       this.player.destroy();
     }
     // プレイヤー
-    await this.addPlayer({ x: 460, floor: 0 });
+    await this.addPlayer({ x: 459, floor: 0 });
   }
 
   protected override async initGoal() {
     // ゴールマーカー設置
-    this.addGoal(465, 2);
+    this.addGoal(468, 2);
   }
 
   protected async initStage(pattern: number) {
-    const margin = 54;
-    this.addTeleportPad(margin, 0, 0, 2);
-    this.addTeleportPad(margin, 1, 1, 0);
-    this.addTeleportPad(margin, 2, 2, 1);
-    this.addForceFieldPad(GAME_WIDTH - margin, 1, 0);
-    this.addForceField(424, 2, 0);
+    this.addTeleportPad(55, 0, 0, 2);
+    this.addTeleportPad(55, 1, 1, 0);
+    this.addTeleportPad(55, 2, 2, 1);
+    this.addForceFieldPad(455, 1, 0);
+    this.addForceField(425, 2, 0);
 
     const enemyTypes: EnemyType[][] = [
       [2, 2, 2],
       [4, 4, 4],
     ];
 
-    this.addEnemies([
+    const enemyArgsFirst: EnemyArg[] = [
       {
-        type: enemyTypes[pattern][0],
-        x: 318,
+        type: 2,
+        x: 319,
         floor: 0,
         bound: {
-          left: 96,
-          right: GAME_WIDTH - 172,
+          left: 99,
+          right: 339,
         },
         direction: 1,
       },
       {
-        type: enemyTypes[pattern][1],
-        x: 262,
+        type: 2,
+        x: 269,
         floor: 1,
         bound: {
-          left: 96,
-          right: GAME_WIDTH - 96,
+          left: 99,
+          right: 429,
         },
         direction: -1,
       },
       {
-        type: enemyTypes[pattern][2],
-        x: 270,
+        type: 2,
+        x: 269,
         floor: 2,
         bound: {
-          left: 96,
-          right: GAME_WIDTH - 172,
+          left: 99,
+          right: 339,
         },
         direction: 1,
       },
-    ]);
+    ];
+
+    const enemyArgs: EnemyArg[][] = [
+      enemyArgsFirst,
+      [
+        {
+          ...enemyArgsFirst[0],
+          type: 4,
+          bound: {
+            leftMin: 94,
+            leftMax: 339,
+            right: 344,
+          },
+        },
+        {
+          ...enemyArgsFirst[1],
+          type: 4,
+          bound: {
+            leftMin: 94,
+            leftMax: 424,
+            right: 429,
+          },
+        },
+        {
+          ...enemyArgsFirst[2],
+          type: 4,
+          bound: {
+            leftMin: 94,
+            leftMax: 339,
+            right: 344,
+          },
+        },
+      ],
+    ];
+
+    this.addEnemies(enemyArgs[pattern]);
   }
 
   protected override doRestartStage() {
