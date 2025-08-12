@@ -1,5 +1,5 @@
 import { GAME_WIDTH } from '~/constants/gameConfig';
-import { BaseStageScene } from '~/scenes/BaseStageScene';
+import { BaseStageScene, type EnemyArg } from '~/scenes/BaseStageScene';
 
 export class Stage5Scene extends BaseStageScene {
   protected override async initPlayer() {
@@ -7,81 +7,87 @@ export class Stage5Scene extends BaseStageScene {
       this.player.destroy();
     }
     // プレイヤー
-    await this.addPlayer({ x: 33, floor: 2 });
+    await this.addPlayer({ x: 34, floor: 2 });
   }
   protected override async initGoal() {
     // ゴールマーカー設置
-    this.addGoal(GAME_WIDTH - 42, 0);
+    this.addGoal(468.5, 0);
   }
-  protected async initStage() {
+  protected async initStage(pattern: number) {
     this.addTeleportPad(90, 2, 0, 1);
     this.addTeleportPad(55, 1, 1, 0);
-    this.addTeleportPad(GAME_WIDTH - 55, 1, 2, 3);
+    this.addTeleportPad(455, 1, 2, 3);
     this.addTeleportPad(55, 0, 3, 2);
-    this.addTeleportPad(129, 0, 4, 5);
-    this.addTeleportPad(GAME_WIDTH - 129, 2, 5, 4);
-    this.addForceFieldPad(305, 2, 0);
-    this.addForceField(98, 1, 0);
-    this.addSleepPad(GAME_WIDTH - 55, 2);
-    this.addWall(GAME_WIDTH - 170, 2);
+    this.addTeleportPad(130, 0, 4, 5);
+    this.addTeleportPad(380, 2, 5, 4);
+    this.addForceFieldPad(304, 2, 0);
+    this.addForceField(105, 1, 0);
+    this.addSleepPad(455, 2);
+    this.addWall(339, 2);
 
-    this.addEnemies([
+    const enemyArgsFirst: EnemyArg[] = [
       {
         type: 1,
         x: 119,
         floor: 2,
         bound: {
           leftMin: 74,
-          leftMax: 304,
+          leftMax: 299,
           right: 304,
         },
         direction: 1,
       },
       {
         type: 1,
-        x: 138,
+        x: 139,
         floor: 1,
         bound: {
-          leftMin: 138,
-          leftMax: 298,
-          right: 303,
+          leftMin: 134,
+          leftMax: 299,
+          right: 304,
         },
-        direction: 1,
+        direction: -1,
       },
       {
         type: 1,
-        x: GAME_WIDTH - 142,
+        x: 369,
         floor: 1,
         bound: {
-          leftMin: GAME_WIDTH - 142,
-          leftMax: GAME_WIDTH - 22,
-          right: GAME_WIDTH - 27,
+          leftMin: 369,
+          leftMax: 479,
+          right: 484,
         },
         direction: 1,
       },
       {
         type: 3,
-        x: 38,
+        x: 39,
         floor: 0,
         bound: {
-          leftMin: 38,
-          leftMax: 219,
-          right: 224,
+          leftMin: 33,
+          leftMax: 223,
+          right: 225,
         },
-        direction: 1,
+        direction: -1,
       },
       {
         type: 3,
-        x: GAME_WIDTH - 221,
+        x: 289,
         floor: 0,
         bound: {
-          leftMax: GAME_WIDTH - 221,
-          leftMin: GAME_WIDTH - 73,
-          right: GAME_WIDTH - 78,
+          leftMin: 283,
+          leftMax: 428,
+          right: 433,
         },
         direction: 1,
       },
-    ]);
+    ];
+
+    const enemyArgsSecond: EnemyArg[] = [];
+
+    const enemyArgs: EnemyArg[][] = [enemyArgsFirst, enemyArgsSecond];
+
+    this.addEnemies(enemyArgs[pattern]);
   }
 
   protected override doRestartStage() {

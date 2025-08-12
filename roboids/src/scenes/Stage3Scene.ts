@@ -1,6 +1,4 @@
-import { GAME_WIDTH } from '~/constants/gameConfig';
 import { BaseStageScene, type EnemyArg } from '~/scenes/BaseStageScene';
-import type { EnemyType } from '~/types';
 
 export class Stage3Scene extends BaseStageScene {
   protected override async initPlayer() {
@@ -22,11 +20,6 @@ export class Stage3Scene extends BaseStageScene {
     this.addTeleportPad(55, 2, 2, 1);
     this.addForceFieldPad(455, 1, 0);
     this.addForceField(425, 2, 0);
-
-    const enemyTypes: EnemyType[][] = [
-      [2, 2, 2],
-      [4, 4, 4],
-    ];
 
     const enemyArgsFirst: EnemyArg[] = [
       {

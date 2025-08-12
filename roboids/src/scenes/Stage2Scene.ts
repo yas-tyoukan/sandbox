@@ -1,4 +1,3 @@
-import { GAME_WIDTH } from '~/constants/gameConfig';
 import { BaseStageScene, type EnemyArg } from '~/scenes/BaseStageScene';
 
 export class Stage2Scene extends BaseStageScene {

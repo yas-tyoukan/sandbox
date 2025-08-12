@@ -1,4 +1,4 @@
-import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
+import { GAME_WIDTH } from '~/constants/gameConfig';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 
 export class Stage1Scene extends BaseStageScene {
@@ -14,11 +14,10 @@ export class Stage1Scene extends BaseStageScene {
     this.addGoal(478.5, 2);
   }
   protected async initStage() {
-    const margin = 54;
-    this.addTeleportPad(GAME_WIDTH - margin, 0, 0, 1);
-    this.addTeleportPad(margin, 1, 1, 0);
-    this.addTeleportPad(GAME_WIDTH - margin, 1, 2, 3);
-    this.addTeleportPad(margin, 2, 3, 2);
+    this.addTeleportPad(455, 0, 0, 1);
+    this.addTeleportPad(55, 1, 1, 0);
+    this.addTeleportPad(455, 1, 2, 3);
+    this.addTeleportPad(55, 2, 3, 2);
 
     // Enemy1の配置（各段中央付近で左右移動）
     this.addEnemies([
