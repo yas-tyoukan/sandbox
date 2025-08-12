@@ -1,5 +1,5 @@
 import { GAME_WIDTH } from '~/constants/gameConfig';
-import { BaseStageScene } from '~/scenes/BaseStageScene';
+import { BaseStageScene, type EnemyArg } from '~/scenes/BaseStageScene';
 
 export class Stage4Scene extends BaseStageScene {
   protected override async initPlayer() {
@@ -13,7 +13,7 @@ export class Stage4Scene extends BaseStageScene {
     // ゴールマーカー設置
     this.addGoal(318, 1);
   }
-  protected async initStage() {
+  protected async initStage(pattern: number) {
     this.addTeleportPad(455, 1, 0, 1);
     this.addTeleportPad(455, 2, 1, 0);
     this.addTeleportPad(55, 2, 2, 3);
@@ -24,14 +24,14 @@ export class Stage4Scene extends BaseStageScene {
     this.addForceField(275, 1, 0);
     this.addWall(360, 1);
 
-    this.addEnemies([
+    const enemyArgsFirst: EnemyArg[] = [
       {
         type: 1,
-        x: 44,
+        x: 39,
         floor: 2,
         bound: {
-          left: 39,
-          right: 479,
+          left: 34,
+          right: 484,
         },
         direction: 1,
       },
@@ -65,7 +65,64 @@ export class Stage4Scene extends BaseStageScene {
         },
         direction: -1,
       },
-    ]);
+    ];
+
+    const enemyArgsSecond: EnemyArg[] = [
+      {
+        ...enemyArgsFirst[0],
+        type: 4,
+        bound: {
+          ...enemyArgsFirst[0].bound,
+          leftMin: 34,
+          leftMax: 489,
+        },
+      },
+      enemyArgsFirst[1],
+      {
+        ...enemyArgsFirst[2],
+        bound: {
+          leftMin: 34,
+          leftMax: 239,
+          right: 244,
+        },
+      },
+      {
+        ...enemyArgsFirst[3],
+        bound: {
+          leftMin: 274,
+          leftMax: 479,
+          right: 484,
+        },
+      },
+    ];
+
+    const enemyArgsThird: EnemyArg[] = [
+      enemyArgsSecond[0],
+      {
+        ...enemyArgsFirst[1],
+        type: 3,
+        bound: {
+          leftMin: 34,
+          leftMax: 239,
+          right: 244,
+        },
+      },
+      enemyArgsSecond[2],
+      {
+        ...enemyArgsSecond[3],
+        type: 5,
+        x: 479,
+        bound: {
+          leftMin: 275,
+          leftMax: 480,
+          right: 485,
+        },
+      },
+    ];
+
+    const enemyArgs: EnemyArg[][] = [enemyArgsFirst, enemyArgsSecond, enemyArgsThird];
+
+    this.addEnemies(enemyArgs[pattern]);
   }
 
   protected override doRestartStage() {
