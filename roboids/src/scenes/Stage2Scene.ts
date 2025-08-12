@@ -39,7 +39,7 @@ export class Stage2Scene extends BaseStageScene {
         floor: 1,
         bound: {
           leftMin: 64,
-          leftMax: 479,
+          // leftMax: 479,
           right: 484,
         },
         direction: -1,

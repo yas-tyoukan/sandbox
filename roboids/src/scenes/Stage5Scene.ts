@@ -32,7 +32,6 @@ export class Stage5Scene extends BaseStageScene {
         floor: 2,
         bound: {
           leftMin: 74,
-          leftMax: 299,
           right: 304,
         },
         direction: 1,
@@ -43,7 +42,6 @@ export class Stage5Scene extends BaseStageScene {
         floor: 1,
         bound: {
           leftMin: 134,
-          leftMax: 299,
           right: 304,
         },
         direction: -1,
@@ -54,7 +52,6 @@ export class Stage5Scene extends BaseStageScene {
         floor: 1,
         bound: {
           leftMin: 369,
-          leftMax: 479,
           right: 484,
         },
         direction: 1,
@@ -65,7 +62,6 @@ export class Stage5Scene extends BaseStageScene {
         floor: 0,
         bound: {
           leftMin: 33,
-          leftMax: 223,
           right: 225,
         },
         direction: -1,
@@ -76,16 +72,87 @@ export class Stage5Scene extends BaseStageScene {
         floor: 0,
         bound: {
           leftMin: 283,
-          leftMax: 428,
           right: 433,
         },
         direction: 1,
       },
     ];
 
-    const enemyArgsSecond: EnemyArg[] = [];
+    const enemyArgsSecond: EnemyArg[] = [
+      {
+        ...enemyArgsFirst[0],
+        type: 4,
+      },
+      {
+        ...enemyArgsFirst[1],
+        type: 5,
+        bound: {
+          leftMin: 133,
+          right: 253,
+        },
+      },
+      {
+        ...enemyArgsFirst[2],
+        type: 3,
+        x: 319,
+        bound: {
+          leftMin: 313,
+          right: 481,
+        },
+      },
+      {
+        ...enemyArgsFirst[3],
+        type: 1,
+        x: 38,
+        bound: {
+          leftMin: 34,
+          right: 224,
+        },
+      },
+      {
+        ...enemyArgsFirst[4],
+        type: 1,
+        x: 289,
+        bound: {
+          leftMin: 289,
+          right: 434,
+        },
+      },
+    ];
 
-    const enemyArgs: EnemyArg[][] = [enemyArgsFirst, enemyArgsSecond];
+    const enemyArgsThird: EnemyArg[] = [
+      enemyArgsSecond[0],
+      {
+        ...enemyArgsFirst[1],
+        type: 4,
+      },
+      {
+        ...enemyArgsFirst[2],
+        type: 4,
+        bound: {
+          left: 364,
+          right: 479,
+        },
+      },
+      {
+        ...enemyArgsFirst[3],
+        type: 4,
+        bound: {
+          leftMin: 33,
+          right: 219,
+        },
+      },
+      {
+        ...enemyArgsFirst[4],
+        type: 4,
+        bound: {
+          leftMin: 284,
+          right: 434,
+        },
+      },
+    ];
+
+    const enemyArgs: EnemyArg[][] = [enemyArgsFirst, enemyArgsSecond, enemyArgsThird];
 
     this.addEnemies(enemyArgs[pattern]);
   }

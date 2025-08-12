@@ -73,7 +73,6 @@ export class Stage4Scene extends BaseStageScene {
         bound: {
           ...enemyArgsFirst[0].bound,
           leftMin: 34,
-          leftMax: 489,
         },
       },
       enemyArgsFirst[1],
@@ -81,7 +80,6 @@ export class Stage4Scene extends BaseStageScene {
         ...enemyArgsFirst[2],
         bound: {
           leftMin: 34,
-          leftMax: 239,
           right: 244,
         },
       },
@@ -89,7 +87,6 @@ export class Stage4Scene extends BaseStageScene {
         ...enemyArgsFirst[3],
         bound: {
           leftMin: 274,
-          leftMax: 479,
           right: 484,
         },
       },
@@ -102,7 +99,6 @@ export class Stage4Scene extends BaseStageScene {
         type: 3,
         bound: {
           leftMin: 34,
-          leftMax: 239,
           right: 244,
         },
       },
@@ -113,7 +109,6 @@ export class Stage4Scene extends BaseStageScene {
         x: 479,
         bound: {
           leftMin: 275,
-          leftMax: 480,
           right: 485,
         },
       },

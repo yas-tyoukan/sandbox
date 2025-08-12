@@ -62,7 +62,6 @@ export class Stage3Scene extends BaseStageScene {
           type: 4,
           bound: {
             leftMin: 94,
-            leftMax: 339,
             right: 344,
           },
         },
@@ -71,7 +70,6 @@ export class Stage3Scene extends BaseStageScene {
           type: 4,
           bound: {
             leftMin: 94,
-            leftMax: 424,
             right: 429,
           },
         },
@@ -80,7 +78,6 @@ export class Stage3Scene extends BaseStageScene {
           type: 4,
           bound: {
             leftMin: 94,
-            leftMax: 339,
             right: 344,
           },
         },
