@@ -1,11 +1,11 @@
 export const GAME_WIDTH = 511;
 export const GAME_HEIGHT = 321;
 export const FLOOR_HEIGHT = 100;
-export const PLAYER_SPEED = 4.4;
+export const PLAYER_SPEED = 4;
 export const ENEMY1_SPEED = 5;
-export const ENEMY2_SPEED = 3.75;
-export const ENEMY3_SPEED = 5.65;
+export const ENEMY2_SPEED = 4;
+export const ENEMY3_SPEED = 6;
 export const ENEMY4_SPEED = 5;
 export const ENEMY5_SPEED = 6;
-export const START_LEVEL = 37;
+export const START_LEVEL = 38;
 export const SLEEP_TIME = 7000; // SLEEP PADでスリープする時間(ミリ秒)

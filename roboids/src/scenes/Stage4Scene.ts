@@ -20,7 +20,7 @@ export class Stage4Scene extends BaseStageScene {
     this.addTeleportPad(55, 1, 4, 5);
     this.addTeleportPad(55, 0, 5, 4);
     this.addForceFieldPad(455, 0, 0);
-    this.addForceField(275, 1, 0);
+    this.addForceField(271, 1, 0);
     this.addWall(360, 1);
 
     const enemyArgsFirst: EnemyArg[] = [

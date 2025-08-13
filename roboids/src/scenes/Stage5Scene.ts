@@ -21,7 +21,7 @@ export class Stage5Scene extends BaseStageScene {
     this.addTeleportPad(130, 0, 4, 5);
     this.addTeleportPad(380, 2, 5, 4);
     this.addForceFieldPad(304, 2, 0);
-    this.addForceField(105, 1, 0);
+    this.addForceField(101, 1, 0);
     this.addSleepPad(455, 2);
     this.addWall(339, 2);
 
