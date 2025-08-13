@@ -252,6 +252,7 @@ export abstract class BaseStageScene extends Container {
           this.startStage(this.level + 1, this.lives);
         }
         this.pauseState = 'none';
+        this.playEnemies();
       }
       // 停止中は他の処理をスキップ
       return;
@@ -412,7 +413,7 @@ export abstract class BaseStageScene extends Container {
     this.pauseState = 'death';
     this.pauseTimer = 30;
     this.resetTeleporting();
-    this.stopSleep();
+    this.stopEnemies();
     playSE('death');
   }
 
