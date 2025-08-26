@@ -5,6 +5,9 @@ import {
   GAME_HEIGHT,
   GAME_WIDTH,
   PLAYER_SPEED,
+  JUMP_GRAVITY,
+  JUMP_VELOCITY,
+  JUMP_VELOCITY_MAX,
   SLEEP_TIME,
 } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
@@ -220,9 +223,6 @@ export abstract class BaseStageScene extends Container {
     this.isPlayerOnGround = true;
     this.velocityY = 0;
     this.wasOnGround = false;
-    // キー入力状態もリセット
-    this.keys = {};
-    this.prevKeys = {};
   }
 
   /**
@@ -230,7 +230,6 @@ export abstract class BaseStageScene extends Container {
    */
   private update = async () => {
     if (this.gameOverModal) return; // Game Over中は進行停止
-
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
       this.pauseTimer--;
@@ -455,6 +454,7 @@ export abstract class BaseStageScene extends Container {
   // ステージの再スタート
   private restartStage() {
     this.resetJumpState();
+    this.resetTeleporting();
     for (const forceField of this.forceFields) {
       forceField.initialize(); // ForceFieldを初期状態にする
     }
@@ -470,7 +470,7 @@ export abstract class BaseStageScene extends Container {
   protected async addPlayer({ x, floor }: { x: number; floor: Floor }) {
     this.player = await Player.create();
     this.player.x = x;
-    this.player.y = this.platformYs[floor] - this.player.height / 2;
+    this.player.y = this.platformYs[floor] - this.player.height / 2 - 3;
     this.player.anchor.set(0.5, 0.5);
     this.addChild(this.player);
   }
@@ -579,6 +579,8 @@ export abstract class BaseStageScene extends Container {
       this.beforeTeleportPlayer.destroy();
       this.beforeTeleportPlayer = null;
     }
+    // スペースキー押しっぱなしでテレポートが連続で起きないようにしている
+    this.prevKeys['Space'] = true;
   }
 
   private updateJump() {
@@ -596,14 +598,14 @@ export abstract class BaseStageScene extends Container {
     }
 
     if (isJumpJustPressed && this.isPlayerOnGround && !this.isTeleporting) {
-      this.velocityY = -8;
+      this.velocityY = JUMP_VELOCITY;
       this.isPlayerOnGround = false;
       playSE('jump');
     }
 
     // 重力
-    this.velocityY += 0.5;
-    if (Math.abs(this.velocityY) > 2.2) {
+    this.velocityY += JUMP_GRAVITY;
+    if (Math.abs(this.velocityY) > JUMP_VELOCITY_MAX) {
       // ジャンプの頭打ち
       this.player.y += this.velocityY;
     }

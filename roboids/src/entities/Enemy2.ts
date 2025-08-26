@@ -9,7 +9,7 @@ import type { Player } from './Player';
 
 sound.add('beam', 'sounds/death.mp3');
 
-const RATE_BEAM = 0.025; // ビーム発射率
+const RATE_BEAM = 0.05; // ビーム発射率
 const BEAM_FRAME_COUNT = 19; // ビームのフレーム数
 
 export class Enemy2 extends EnemyBase {
@@ -101,7 +101,7 @@ export class Enemy2 extends EnemyBase {
       return;
     }
 
-    // 10%の確率でビーム発射
+    // ビーム発射判定
     if (Math.random() < RATE_BEAM) {
       this.isShooting = true;
       this.beamFrameCount = 0;
