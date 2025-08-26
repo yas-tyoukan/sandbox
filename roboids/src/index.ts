@@ -133,4 +133,10 @@ async function main() {
   showTitle();
 }
 
-main();
+// include the web-font loader script
+(async () => {
+  // Add font files to the bundle
+  PIXI.Assets.addBundle('fonts', [{ alias: 'ChicagoFLF', src: '/fonts/ChicagoFLF.ttf' }]);
+  await PIXI.Assets.loadBundle('fonts');
+  main();
+})();

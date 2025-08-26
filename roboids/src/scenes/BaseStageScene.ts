@@ -164,22 +164,32 @@ export abstract class BaseStageScene extends Container {
   private createStatusBar() {
     // 下部バー
     const statusBarHeight = 20;
-    this.statusBar = new Graphics();
-    this.statusBar.rect(0, GAME_HEIGHT - statusBarHeight, GAME_WIDTH, statusBarHeight);
-    this.statusBar.fill(0xffffff);
-    this.addChild(this.statusBar);
+    const g = new Graphics();
+    g.rect(0, GAME_HEIGHT - statusBarHeight, GAME_WIDTH, statusBarHeight);
+    g.fill(0xffffff);
+    this.addChild(g);
+    this.statusBar = g;
 
     // Level表示（左下）
-    this.levelText = new Text({
-      text: `Level: ${this.level}`,
+    const levelLabelText = new Text({
+      text: 'Level:',
       style: {
-        fontFamily: 'monospace',
-        fontSize: 14,
+        fontFamily: 'ChicagoFLF',
+        fontSize: 10,
+        fontWeight: 'bold',
+        letterSpacing: 0.8,
         fill: 0x000000,
       },
     });
-    this.levelText.x = 12;
-    this.levelText.y = GAME_HEIGHT - statusBarHeight;
+    levelLabelText.x = 8;
+    levelLabelText.y = GAME_HEIGHT - statusBarHeight + 4;
+    this.addChild(levelLabelText);
+    this.levelText = new Text({
+      text: `${this.level}`,
+      style: levelLabelText.style,
+    });
+    this.levelText.x = levelLabelText.x + levelLabelText.width + 8;
+    this.levelText.y = levelLabelText.y;
     this.addChild(this.levelText);
 
     // Robots（残機）表示（右下）
@@ -187,7 +197,9 @@ export abstract class BaseStageScene extends Container {
       text: `Robots: ${this.lives}`,
       style: {
         fontFamily: 'monospace',
-        fontSize: 14,
+        fontWeight: 'bold',
+        fontSize: 11,
+        letterSpacing: 5,
         fill: 0x000000,
       },
     });
@@ -206,7 +218,7 @@ export abstract class BaseStageScene extends Container {
   }
 
   private updateStatusBar() {
-    this.levelText.text = `Level: ${this.level}`;
+    this.levelText.text = `${this.level}`;
     this.livesText.text = `Robots: ${this.lives}`;
   }
 
