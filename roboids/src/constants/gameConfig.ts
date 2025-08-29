@@ -10,5 +10,5 @@ export const ENEMY2_SPEED = 4;
 export const ENEMY3_SPEED = 6;
 export const ENEMY4_SPEED = 5;
 export const ENEMY5_SPEED = 6;
-export const START_LEVEL = 105;
+export const START_LEVEL = 1190;
 export const SLEEP_TIME = 7000; // SLEEP PADでスリープする時間(ミリ秒)

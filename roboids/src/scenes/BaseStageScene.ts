@@ -23,6 +23,8 @@ import { SleepPad } from '~/entities/SleepPad';
 import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction, EnemyType } from '~/types';
 import { playSE } from '~/utils/playSE';
+import { TextLevel } from '~/entities/TextLevel';
+import { TextNumber } from '~/entities/TextNumber';
 
 export type EnemyArg = {
   type: EnemyType;
@@ -60,7 +62,7 @@ export abstract class BaseStageScene extends Container {
 
   private statusBar!: Graphics;
   private livesText!: Text;
-  private levelText!: Text;
+  private levelValueText!: TextNumber;
   private gameOverModal?: Container;
   private level: number; // 現在のレベル（ステージ番号）
 
@@ -161,36 +163,21 @@ export abstract class BaseStageScene extends Container {
     }
   }
 
-  private createStatusBar() {
+  private async createStatusBar() {
     // 下部バー
     const statusBarHeight = 20;
     const g = new Graphics();
-    g.rect(0, GAME_HEIGHT - statusBarHeight, GAME_WIDTH, statusBarHeight);
+    const statusBarTop = GAME_HEIGHT - statusBarHeight;
+    g.rect(0, statusBarTop, GAME_WIDTH, statusBarHeight);
     g.fill(0xffffff);
     this.addChild(g);
     this.statusBar = g;
 
     // Level表示（左下）
-    const levelLabelText = new Text({
-      text: 'Level:',
-      style: {
-        fontFamily: 'ChicagoFLF',
-        fontSize: 10,
-        fontWeight: 'bold',
-        letterSpacing: 0.8,
-        fill: 0x000000,
-      },
-    });
-    levelLabelText.x = 8;
-    levelLabelText.y = GAME_HEIGHT - statusBarHeight + 4;
+    const levelLabelText = await TextLevel.create(9, statusBarTop + 6);
     this.addChild(levelLabelText);
-    this.levelText = new Text({
-      text: `${this.level}`,
-      style: levelLabelText.style,
-    });
-    this.levelText.x = levelLabelText.x + levelLabelText.width + 8;
-    this.levelText.y = levelLabelText.y;
-    this.addChild(this.levelText);
+    this.levelValueText = await TextNumber.create(50, statusBarTop + 5, this.level);
+    this.addChild(this.levelValueText);
 
     // Robots（残機）表示（右下）
     this.livesText = new Text({
@@ -218,7 +205,7 @@ export abstract class BaseStageScene extends Container {
   }
 
   private updateStatusBar() {
-    this.levelText.text = `${this.level}`;
+    this.levelValueText?.setValue(this.level);
     this.livesText.text = `Robots: ${this.lives}`;
   }
 
