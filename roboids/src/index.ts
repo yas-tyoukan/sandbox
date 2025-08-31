@@ -1,6 +1,6 @@
 import { sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
-import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL } from '~/constants/gameConfig';
+import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL, LIVES } from '~/constants/gameConfig';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
 import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { Stage3Scene } from '~/scenes/Stage3Scene';
@@ -86,7 +86,7 @@ async function main() {
     return [stagePattern, enemyPattern];
   }
 
-  function startStage(level = 1, lives = 1004) {
+  function startStage(level = 1, lives = LIVES) {
     if (currentScene) {
       app.stage.removeChild(currentScene);
       currentScene.destroy({ children: true });

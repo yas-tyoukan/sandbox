@@ -24,7 +24,9 @@ import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction, EnemyType } from '~/types';
 import { playSE } from '~/utils/playSE';
 import { TextLevel } from '~/entities/TextLevel';
+import { TextRobots } from '~/entities/TextRobots';
 import { TextNumber } from '~/entities/TextNumber';
+import { Logo2 } from '~/entities/Logo2';
 
 export type EnemyArg = {
   type: EnemyType;
@@ -60,8 +62,7 @@ export abstract class BaseStageScene extends Container {
   protected forceFieldPads: ForceFieldPad[] = [];
   protected sleepPads: SleepPad[] = [];
 
-  private statusBar!: Graphics;
-  private livesText!: Text;
+  private robotsValueText!: TextNumber;
   private levelValueText!: TextNumber;
   private gameOverModal?: Container;
   private level: number; // 現在のレベル（ステージ番号）
@@ -171,29 +172,23 @@ export abstract class BaseStageScene extends Container {
     g.rect(0, statusBarTop, GAME_WIDTH, statusBarHeight);
     g.fill(0xffffff);
     this.addChild(g);
-    this.statusBar = g;
 
     // Level表示（左下）
     const levelLabelText = await TextLevel.create(9, statusBarTop + 6);
     this.addChild(levelLabelText);
-    this.levelValueText = await TextNumber.create(50, statusBarTop + 5, this.level);
+    this.levelValueText = await TextNumber.create(50, statusBarTop + 6, this.level);
     this.addChild(this.levelValueText);
 
     // Robots（残機）表示（右下）
-    this.livesText = new Text({
-      text: `Robots: ${this.lives}`,
-      style: {
-        fontFamily: 'monospace',
-        fontWeight: 'bold',
-        fontSize: 11,
-        letterSpacing: 5,
-        fill: 0x000000,
-      },
-    });
-    this.livesText.anchor.set(1, 0);
-    this.livesText.x = GAME_WIDTH - 12;
-    this.livesText.y = GAME_HEIGHT - statusBarHeight;
-    this.addChild(this.livesText);
+    const robotsText = await TextRobots.create(444, statusBarTop + 6);
+    this.addChild(robotsText);
+    this.robotsValueText = await TextNumber.create(494, statusBarTop + 6, this.lives);
+    this.addChild(this.robotsValueText);
+
+    // ロゴ表示
+    const logo = await Logo2.create(146, statusBarTop + 1);
+    this.addChild(logo);
+
     // border表示
     const border = new Graphics();
     const borderY = GAME_HEIGHT - statusBarHeight;
@@ -206,7 +201,7 @@ export abstract class BaseStageScene extends Container {
 
   private updateStatusBar() {
     this.levelValueText?.setValue(this.level);
-    this.livesText.text = `Robots: ${this.lives}`;
+    this.robotsValueText?.setValue(this.lives);
   }
 
   // 入力処理
