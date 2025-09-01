@@ -133,10 +133,11 @@ async function main() {
   showTitle();
 }
 
-// include the web-font loader script
-(async () => {
-  // Add font files to the bundle
-  PIXI.Assets.addBundle('fonts', [{ alias: 'ChicagoFLF', src: '/fonts/ChicagoFLF.ttf' }]);
-  await PIXI.Assets.loadBundle('fonts');
-  main();
-})();
+// // include the web-font loader script
+// (async () => {
+//   // Add font files to the bundle
+//   PIXI.Assets.addBundle('fonts', [{ alias: 'Osaka', src: '/fonts/Osaka.ttf' }]);
+//   await PIXI.Assets.loadBundle('fonts');
+//   main();
+// })();
+main();

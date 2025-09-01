@@ -26,6 +26,7 @@ import { playSE } from '~/utils/playSE';
 import { TextLevel } from '~/entities/TextLevel';
 import { TextRobots } from '~/entities/TextRobots';
 import { TextNumber } from '~/entities/TextNumber';
+import { Logo1 } from '~/entities/Logo1';
 import { Logo2 } from '~/entities/Logo2';
 
 export type EnemyArg = {
@@ -238,14 +239,14 @@ export abstract class BaseStageScene extends Container {
         if (this.pauseState === 'death') {
           if (this.lives === 0) {
             this.showGameOver();
-          } else {
-            this.restartStage();
+            return;
           }
+          this.restartStage();
         } else if (this.pauseState === 'clear') {
           this.startStage(this.level + 1, this.lives);
         }
         this.pauseState = 'none';
-        this.playEnemies();
+        this.playSpriteAnimation();
       }
       // 停止中は他の処理をスキップ
       return;
@@ -406,14 +407,14 @@ export abstract class BaseStageScene extends Container {
     this.pauseState = 'death';
     this.pauseTimer = 30;
     this.resetTeleporting();
-    this.stopEnemies();
+    this.stopSpriteAnimation();
     playSE('death');
   }
 
   // sleep処理
   private startSleep() {
     this.asleep = true;
-    this.stopEnemies();
+    this.stopSpriteAnimation();
     if (this.sleepTimer !== null) {
       clearTimeout(this.sleepTimer);
       this.sleepTimer = null;
@@ -421,7 +422,7 @@ export abstract class BaseStageScene extends Container {
     this.sleepTimer = setTimeout(() => {
       this.asleep = false;
       this.sleepTimer = null;
-      this.playEnemies();
+      this.playSpriteAnimation();
     }, SLEEP_TIME);
   }
 
@@ -433,15 +434,23 @@ export abstract class BaseStageScene extends Container {
     }
   }
 
-  private stopEnemies() {
+  private stopSpriteAnimation() {
     for (const enemy of this.enemies) {
       enemy.stop();
     }
+    this.goal.stop();
+    for (const field of this.forceFields) {
+      field.stop();
+    }
   }
 
-  private playEnemies() {
+  private playSpriteAnimation() {
     for (const enemy of this.enemies) {
       enemy.play();
+    }
+    this.goal.play();
+    for (const field of this.forceFields) {
+      field.play();
     }
   }
 
@@ -637,6 +646,7 @@ export abstract class BaseStageScene extends Container {
 
   // Game Overモーダル表示
   private showGameOver() {
+    this.stopSpriteAnimation();
     this.gameOverModal = new Container();
 
     // モーダル背景

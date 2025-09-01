@@ -38,4 +38,14 @@ export class ForceField extends Container {
   initialize() {
     this.visible = this.initialVisible;
   }
+  stop() {
+    for (const s of this.sprites) {
+      s.stop();
+    }
+  }
+  play() {
+    for (const s of this.sprites) {
+      s.play();
+    }
+  }
 }

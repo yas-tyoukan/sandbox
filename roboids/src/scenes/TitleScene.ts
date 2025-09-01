@@ -2,6 +2,8 @@ import { DotFilter, GlitchFilter } from 'pixi-filters';
 import { Assets, Container, Graphics, type Spritesheet, Text, Ticker } from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
+import { Logo1 } from '~/entities/Logo1';
+import { Logo2 } from '~/entities/Logo2';
 
 export class TitleScene extends Container {
   private readonly onStart: (level: number) => void;
@@ -30,7 +32,7 @@ export class TitleScene extends Container {
   private async init() {
     // 中央の四角（タイトルボックス）を描画
     const boxWidth = 340;
-    const boxHeight = 220;
+    const boxHeight = 224;
     const boxX = (GAME_WIDTH - boxWidth) / 2;
     const boxY = (GAME_HEIGHT - boxHeight) / 2;
 
@@ -42,35 +44,14 @@ export class TitleScene extends Container {
 
     const border1 = new Graphics();
     border1.rect(boxX + 1, boxY + 1, boxWidth - 2, boxHeight - 2);
-    border1.stroke({ width: 1, color: 0x000000 });
+    border1.stroke({ width: 0.5, color: 0x000000 });
     const border2 = new Graphics();
     border2.rect(boxX + 3, boxY + 3, boxWidth - 6, boxHeight - 6);
-    border2.stroke({ width: 1, color: 0xffffff });
+    border2.stroke({ width: 0.5, color: 0xffffff });
     this.addChild(border1, border2);
 
     // タイトルロゴ（Textで仮表示、今後画像に差し替え可）
-    const logo = new Text({
-      text: 'Roboids',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 32,
-        fill: 0xffffff,
-        fontWeight: 'bold',
-        letterSpacing: 8,
-      },
-    });
-    logo.anchor.set(0.5);
-    logo.x = boxX + boxWidth / 2;
-    logo.y = boxY + 40;
-    logo.filters = [
-      new DotFilter({ scale: 1, angle: 5, grayscale: true }),
-      new GlitchFilter({
-        slices: 5,
-        offset: 5,
-        direction: -60,
-        seed: 123,
-      }),
-    ];
+    const logo = await Logo1.create(178, 66);
     this.addChild(logo);
 
     // ゲーム説明
@@ -85,22 +66,22 @@ export class TitleScene extends Container {
     });
     desc.anchor.set(0.5);
     desc.x = boxX + boxWidth / 2;
-    desc.y = boxY + 100;
+    desc.y = boxY + 120;
     this.addChild(desc);
 
     // 著作表示
     const credit = new Text({
       text: '©1991 Glenn Seemann\nPorted and modified by yas-tyoukan.',
       style: {
-        fontFamily: 'san-serif',
-        fontSize: 10,
+        fontFamily: 'Osaka',
+        fontSize: 8,
         fill: 0xffffff,
         align: 'center',
       },
     });
     credit.anchor.set(0.5);
     credit.x = boxX + boxWidth / 2;
-    credit.y = boxY + boxHeight - 20;
+    credit.y = boxY + boxHeight - 14;
     this.addChild(credit);
 
     // Enemy1配置
