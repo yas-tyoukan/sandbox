@@ -651,8 +651,8 @@ export abstract class BaseStageScene extends Container {
 
     // モーダル背景
     const modalBg = new Graphics();
-    const mw = 260;
-    const mh = 120;
+    const mw = 194;
+    const mh = 113;
     const mx = (GAME_WIDTH - mw) / 2;
     const my = (GAME_HEIGHT - mh) / 2;
     modalBg.rect(mx, my, mw, mh);
