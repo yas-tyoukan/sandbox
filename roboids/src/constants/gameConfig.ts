@@ -12,4 +12,5 @@ export const ENEMY4_SPEED = 5;
 export const ENEMY5_SPEED = 6;
 export const START_LEVEL = 1190;
 export const SLEEP_TIME = 7000; // SLEEP PADでスリープする時間(ミリ秒)
-export const LIVES = 4; // 初期ライフ数
+export const LIVES = 1; // 初期ライフ数
+export const GAME_OVER_MODAL_Y = 54;

@@ -28,6 +28,7 @@ import { TextRobots } from '~/entities/TextRobots';
 import { TextNumber } from '~/entities/TextNumber';
 import { Logo1 } from '~/entities/Logo1';
 import { Logo2 } from '~/entities/Logo2';
+import { GameOverModal } from '~/entities/GameOverModal';
 
 export type EnemyArg = {
   type: EnemyType;
@@ -121,7 +122,9 @@ export abstract class BaseStageScene extends Container {
 
   // ステージ固有の初期化（サブクラスで実装）
   protected abstract initStage(patten: number): void;
+
   protected abstract initPlayer(): Promise<void>;
+
   protected abstract initGoal(): Promise<void>;
 
   private createStageBase() {
@@ -645,58 +648,61 @@ export abstract class BaseStageScene extends Container {
   }
 
   // Game Overモーダル表示
-  private showGameOver() {
+  private async showGameOver() {
     this.stopSpriteAnimation();
-    this.gameOverModal = new Container();
+    const gameOverModal = await GameOverModal.create(GAME_WIDTH / 2, 54);
+    this.addChild(gameOverModal);
 
-    // モーダル背景
-    const modalBg = new Graphics();
-    const mw = 194;
-    const mh = 113;
-    const mx = (GAME_WIDTH - mw) / 2;
-    const my = (GAME_HEIGHT - mh) / 2;
-    modalBg.rect(mx, my, mw, mh);
-    modalBg.stroke({ width: 3, color: 0x8888ff });
-    modalBg.fill(0xfafaff);
-    this.gameOverModal.addChild(modalBg);
-
-    // Game Overテキスト
-    const overText = new Text({
-      text: 'Game Over',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 32,
-        fill: 0x222233,
-        align: 'center',
-      },
-    });
-    overText.anchor.set(0.5);
-    overText.x = GAME_WIDTH / 2;
-    overText.y = my + 38;
-    this.gameOverModal.addChild(overText);
-
-    // Okayボタン
-    const okayText = new Text({
-      text: 'Okay',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 24,
-        fill: 0x222233,
-        align: 'center',
-      },
-    });
-    okayText.anchor.set(0.5);
-    okayText.x = GAME_WIDTH / 2;
-    okayText.y = my + mh - 32;
-    okayText.eventMode = 'static';
-    okayText.cursor = 'pointer';
-    okayText.on('pointerdown', () => {
-      // ここでタイトル画面に戻るなど
-      this.showTitle();
-    });
-    this.gameOverModal.addChild(okayText);
-
-    this.addChild(this.gameOverModal);
+    // this.gameOverModal = new Container();
+    //
+    // // モーダル背景
+    // const modalBg = new Graphics();
+    // const mw = 194;
+    // const mh = 113;
+    // const mx = (GAME_WIDTH - mw) / 2;
+    // const my = (GAME_HEIGHT - mh) / 2;
+    // modalBg.rect(mx, my, mw, mh);
+    // modalBg.stroke({ width: 3, color: 0x8888ff });
+    // modalBg.fill(0xfafaff);
+    // this.gameOverModal.addChild(modalBg);
+    //
+    // // Game Overテキスト
+    // const overText = new Text({
+    //   text: 'Game Over',
+    //   style: {
+    //     fontFamily: 'monospace',
+    //     fontSize: 32,
+    //     fill: 0x222233,
+    //     align: 'center',
+    //   },
+    // });
+    // overText.anchor.set(0.5);
+    // overText.x = GAME_WIDTH / 2;
+    // overText.y = my + 38;
+    // this.gameOverModal.addChild(overText);
+    //
+    // // Okayボタン
+    // const okayText = new Text({
+    //   text: 'Okay',
+    //   style: {
+    //     fontFamily: 'monospace',
+    //     fontSize: 24,
+    //     fill: 0x222233,
+    //     align: 'center',
+    //   },
+    // });
+    // okayText.anchor.set(0.5);
+    // okayText.x = GAME_WIDTH / 2;
+    // okayText.y = my + mh - 32;
+    // okayText.eventMode = 'static';
+    // okayText.cursor = 'pointer';
+    // okayText.on('pointerdown', () => {
+    //   // ここでタイトル画面に戻るなど
+    //   this.showTitle();
+    // });
+    // this.gameOverModal.addChild(okayText);
+    //
+    // this.addChild(this.gameOverModal);
   }
 
   override destroy(options?: boolean | import('pixi.js').DestroyOptions) {

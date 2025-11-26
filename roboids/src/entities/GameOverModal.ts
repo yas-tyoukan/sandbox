@@ -1,45 +1,57 @@
-import { Assets, Container, Sprite, type Texture } from 'pixi.js';
+import { Assets, Container, Sprite } from 'pixi.js';
+import { GAME_OVER_MODAL_Y } from '~/constants/gameConfig';
 
 export class GameOverModal extends Container {
   private sprites: Sprite[] = [];
-  private okTex0: Texture;
-  private okTex1: Texture;
+  ok: Sprite;
 
-  constructor(x: number, y: number, modalTextures: Sprite, okTex0: Sprite, okTex1: Sprite) {
+  constructor(x: number, y: number, ms: Sprite, okNotSelected: Sprite, okSelected: Sprite) {
     super();
-    const ms = new Sprite(modalTextures);
-    this.okTex0 = okTex0;
-    this.okTex1 = okTex1;
-    const ok = new Sprite(tex0);
-    ok.cursor = 'pointer';
-    ok.on('pointerdown', () => {
-      ok.texture = tex1;
-    });
-    ok.on('pointerup', () => {
-      ok.texture = tex0;
-    });
-    ok.anchor.x = 0.5;
-    ok.x = ms.width / 2;
-    ok.y = 66;
-
+    // モーダル本体の位置調整(上端中央基準)
+    this.pivot.set(ms.width / 2, 0);
     this.x = x;
     this.y = y;
-    this.sprites.push(ms);
-    this.sprites.push(ok);
-    this.ok = ok;
-    this.addChild(...this.sprites);
+    this.ok = okNotSelected;
+    const modalContainer = new Container();
+    modalContainer.addChild(ms);
+    modalContainer.addChild(okNotSelected);
+    okNotSelected.zIndex = 100;
+    okNotSelected.x = (ms.width - okNotSelected.width) / 2;
+    // TODO okボタンの位置、選択状態切り替え処理
+    // modalContainer.addChild(ok);
+    this.addChild(modalContainer);
   }
 
   // 非同期ファクトリメソッドで生成
   static async create(x: number, y: number): Promise<GameOverModal> {
     const modalTextures = await Assets.load('/images/game-over-modal.png');
-    const okTex: Texture[] = await Assets.load('/images/ok-button.png');
-    const okTex0 = okTex[0];
-    const okTex1 = okTex[1];
-    return new GameOverModal(x, y, modalTextures, okTex0, okTex1);
+    const okSheet = await Assets.load('/images/ok-button.json');
+    const modal = new Sprite(modalTextures);
+    const okNotSelected = new Sprite(okSheet.textures['image0.png']);
+    const okSelected = new Sprite(okSheet.textures['image1.png']);
+    // ok.cursor = 'pointer';
+    // ok.on('pointerdown', () => {
+    //   ok.texture = selectedTexture;
+    // });
+    // ok.on('keydown', () => {
+    //   ok.texture = selectedTexture;
+    // });
+    // ok.on('pointerup', () => {
+    //   ok.texture = notSelectedTexture;
+    // });
+    // ok.anchor.x = 0.5;
+    // ok.x = modal.width / 2;
+    // ok.y = 66;
+    return new GameOverModal(x, y, modal, okNotSelected, okSelected);
   }
 
-  toggleOkButton(interactive: boolean) {
-    this.ok.texture = this.ok.texture === this.okTex0 ? this.okTex1 : this.okTex0;
-  }
+  // toggleOkButton(interactive: boolean) {
+  //   this.ok.interactive = interactive;
+  //   // ok.buttonMode = interactive;
+  //   if (interactive) {
+  //     this.ok.alpha = 1.0;
+  //   } else {
+  //     this.ok.alpha = 0.5;
+  //   }
+  // }
 }
