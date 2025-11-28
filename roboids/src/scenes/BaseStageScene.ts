@@ -66,7 +66,6 @@ export abstract class BaseStageScene extends Container {
 
   private robotsValueText!: TextNumber;
   private levelValueText!: TextNumber;
-  private gameOverModal?: Container;
   private level: number; // 現在のレベル（ステージ番号）
 
   // キー入力管理
@@ -93,6 +92,7 @@ export abstract class BaseStageScene extends Container {
   private asleep = false;
   private sleepCount = 0;
   private sleepTimer: number | null = null;
+  private isGameOver = false;
 
   constructor({
     startStage,
@@ -227,7 +227,7 @@ export abstract class BaseStageScene extends Container {
    * 更新処理
    */
   private update = async () => {
-    if (this.gameOverModal) return; // Game Over中は進行停止
+    if (this.isGameOver) return; // Game Over中は進行停止
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
       this.pauseTimer--;
@@ -242,6 +242,7 @@ export abstract class BaseStageScene extends Container {
         if (this.pauseState === 'death') {
           if (this.lives === 0) {
             this.showGameOver();
+            this.isGameOver = true;
             return;
           }
           this.restartStage();
