@@ -55,18 +55,18 @@ export class TitleScene extends Container {
     this.addChild(logo);
 
     // ゲーム説明
-    const object = new Text({
-      text: `    Object: You must get the power square 
+    const object = new Text(
+      `    Object: You must get the power square 
 on each screen by maneuvering past the enemy 
 Roboids. Once you pick up the power square 
 you will be advanced to the next level.`,
-      style: {
-        fontFamily: 'Osaka',
+      {
+        fontFamily: 'monospace',
         fontSize: 9,
         fill: 0xffffff,
         align: 'left',
       },
-    });
+    );
     object.anchor.set(0.5);
     object.x = boxX + boxWidth / 2;
     object.y = boxY + 168;

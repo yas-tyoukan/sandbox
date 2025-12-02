@@ -124,7 +124,13 @@ async function main() {
     currentScene = stage;
     app.stage.addChild(stage);
   }
-
+  await document.fonts.ready;
+  console.log(document.fonts.check('48px Osaka'));
+  console.log(document.fonts.check('18px PlaywriteNO'));
+  console.log(document.fonts.check('18px ScienceGothic'));
+  // todo フォント探して設定。awaitするけど、タイムアウトも設定する
+  await document.fonts.load('18px ScienceGothic');
+  console.log(document.fonts.check('18px ScienceGothic'));
   showTitle();
 }
 
