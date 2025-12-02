@@ -7,7 +7,14 @@ export class GameOverModal extends Container {
   isOkButtonPressed = false;
   okButtonSprite: Sprite;
 
-  constructor(x: number, y: number, ms: Sprite, okNotSelected: Texture, okSelected: Texture) {
+  constructor(
+    x: number,
+    y: number,
+    ms: Sprite,
+    okNotSelected: Texture,
+    okSelected: Texture,
+    onAfterClose: () => void,
+  ) {
     super();
 
     // モーダル本体の位置調整(上端中央基準)
@@ -18,55 +25,72 @@ export class GameOverModal extends Container {
     // OKボタン画像本体
     this.okButtonSprite = new Sprite(okNotSelected);
 
-    // OKボタン用の view（Sprite を入れる箱）
+    // OKボタン用の view
     const okButtonView = new Container();
     okButtonView.addChild(this.okButtonSprite);
 
-    // PixiUI Button（skin を完全無効化）
-    this.okButton = new Button(okButtonView, {
-      // disableSkin: true,
-    });
+    // PixiUI Button
+    this.okButton = new Button(okButtonView);
 
     // モーダル用コンテナ
     const modalContainer = new Container();
     modalContainer.addChild(ms);
     modalContainer.addChild(this.okButton.view);
 
-    // OKボタンの配置
+    // OKボタンの設定
     okButtonView.x = (ms.width - okNotSelected.width) / 2;
     okButtonView.y = 66;
 
-    // TODO: ボタンイベント処理
-
     // 押した（押し込み）
     this.okButton.onDown.connect(() => {
-      console.log('OK button down');
       this.okButtonSprite.texture = okSelected;
+      this.isOkButtonPressed = true;
+    });
+
+    // 離した
+    this.okButton.onUp.connect(() => {
+      this.isOkButtonPressed = false;
     });
 
     // 押して離した
     this.okButton.onPress.connect(() => {
-      console.log('OK button press');
       this.isOkButtonPressed = true;
-      this.okButtonSprite.texture = okSelected;
-    });
-
-    // 指を離した瞬間
-    this.okButton.onUp.connect(() => {
-      console.log('OK button up');
       this.okButtonSprite.texture = okNotSelected;
-    });
-
-    // hover（カーソルが乗った）
-    this.okButton.onHover.connect(() => {
-      console.log('OK button hover');
-      this.okButtonSprite.texture = okSelected;
+      this.parent?.removeChild(this);
     });
 
     // out（カーソルが外れた）
     this.okButton.onOut.connect(() => {
-      console.log('OK button out');
       this.okButtonSprite.texture = okNotSelected;
+    });
+
+    // out（カーソルが入った）
+    this.okButton.onHover.connect(() => {
+      if (!this.isOkButtonPressed) return;
+      this.okButtonSprite.texture = okSelected;
+    });
+
+    // エンターキーでの操作にも対応
+    const keydownHandler = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      this.okButtonSprite.texture = okSelected;
+    };
+
+    const keyupHandler = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return;
+      this.okButtonSprite.texture = okNotSelected;
+      this.parent?.removeChild(this);
+    };
+
+    window.addEventListener('keydown', keydownHandler);
+    window.addEventListener('keyup', keyupHandler);
+
+    // モーダルが削除された時の処理
+    this.on('removed', () => {
+      // イベントリスナーを解除
+      window.removeEventListener('keydown', keydownHandler);
+      window.removeEventListener('keyup', keyupHandler);
+      onAfterClose();
     });
 
     // 追加
@@ -75,7 +99,7 @@ export class GameOverModal extends Container {
   }
 
   // 非同期ファクトリメソッドで生成
-  static async create(x: number, y: number): Promise<GameOverModal> {
+  static async create(x: number, y: number, onAfterClose: () => void): Promise<GameOverModal> {
     const modalTextures = await Assets.load('/images/game-over-modal.png');
     const okSheet = await Assets.load('/images/ok-button.json');
 
@@ -84,6 +108,6 @@ export class GameOverModal extends Container {
     const okNotSelected = okSheet.textures['image0.png'];
     const okSelected = okSheet.textures['image1.png'];
 
-    return new GameOverModal(x, y, modal, okNotSelected, okSelected);
+    return new GameOverModal(x, y, modal, okNotSelected, okSelected, onAfterClose);
   }
 }

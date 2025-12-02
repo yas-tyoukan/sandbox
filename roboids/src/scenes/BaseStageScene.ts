@@ -9,6 +9,7 @@ import {
   JUMP_VELOCITY,
   JUMP_VELOCITY_MAX,
   SLEEP_TIME,
+  START_LEVEL,
 } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
@@ -50,7 +51,7 @@ sound.add('teleport', 'sounds/teleport.mp3');
 sound.add('force-field', 'sounds/force-field.mp3');
 
 export abstract class BaseStageScene extends Container {
-  protected startStage: (level: number, lives: number) => void;
+  protected startStage: (level?: number, lives?: number) => void;
   protected lives: number;
   protected showTitle: () => void;
   protected player!: Player;
@@ -101,7 +102,7 @@ export abstract class BaseStageScene extends Container {
     pattern,
     level,
   }: {
-    startStage: (level: number, lives: number) => void;
+    startStage: (level?: number, lives?: number) => void;
     lives: number;
     showTitle: () => void;
     pattern: number; // ステージのパターン番号（サブクラスで使用）
@@ -267,10 +268,10 @@ export abstract class BaseStageScene extends Container {
     // プレイヤー左右移動
     if (!this.isTeleporting) {
       const speed = PLAYER_SPEED;
-      if (this.keys['KeyA']) {
+      if (this.keys['KeyA'] || this.keys['ArrowLeft']) {
         this.player.x -= speed;
       }
-      if (this.keys['KeyD']) {
+      if (this.keys['KeyD'] || this.keys['ArrowRight']) {
         this.player.x += speed;
       }
 
@@ -591,9 +592,13 @@ export abstract class BaseStageScene extends Container {
   }
 
   private updateJump() {
-    const isJumpJustPressed = this.keys['KeyW'] && !this.prevKeys['KeyW'];
-    const isJumpPressed = this.keys['KeyW'];
-    const isJumpJustReleased = !this.keys['KeyW'] && this.prevKeys['KeyW'];
+    const isJumpJustPressed =
+      (this.keys['KeyW'] || this.keys['ArrowUp']) &&
+      !(this.prevKeys['KeyW'] || this.prevKeys['ArrowUp']);
+    const isJumpPressed = this.keys['KeyW'] || this.keys['ArrowUp'];
+    const isJumpJustReleased =
+      !(this.keys['KeyW'] || this.keys['ArrowUp']) &&
+      (this.prevKeys['KeyW'] || this.prevKeys['ArrowUp']);
 
     // ジャンプ中またはテレポート中にwキーが新たに押された場合、ジャンプ予約
     if (isJumpJustPressed && (!this.isPlayerOnGround || this.isTeleporting)) {
@@ -651,59 +656,10 @@ export abstract class BaseStageScene extends Container {
   // Game Overモーダル表示
   private async showGameOver() {
     this.stopSpriteAnimation();
-    const gameOverModal = await GameOverModal.create(GAME_WIDTH / 2, 54);
+    const gameOverModal = await GameOverModal.create(GAME_WIDTH / 2, 54, () => {
+      this.startStage();
+    });
     this.addChild(gameOverModal);
-
-    // this.gameOverModal = new Container();
-    //
-    // // モーダル背景
-    // const modalBg = new Graphics();
-    // const mw = 194;
-    // const mh = 113;
-    // const mx = (GAME_WIDTH - mw) / 2;
-    // const my = (GAME_HEIGHT - mh) / 2;
-    // modalBg.rect(mx, my, mw, mh);
-    // modalBg.stroke({ width: 3, color: 0x8888ff });
-    // modalBg.fill(0xfafaff);
-    // this.gameOverModal.addChild(modalBg);
-    //
-    // // Game Overテキスト
-    // const overText = new Text({
-    //   text: 'Game Over',
-    //   style: {
-    //     fontFamily: 'monospace',
-    //     fontSize: 32,
-    //     fill: 0x222233,
-    //     align: 'center',
-    //   },
-    // });
-    // overText.anchor.set(0.5);
-    // overText.x = GAME_WIDTH / 2;
-    // overText.y = my + 38;
-    // this.gameOverModal.addChild(overText);
-    //
-    // // Okayボタン
-    // const okayText = new Text({
-    //   text: 'Okay',
-    //   style: {
-    //     fontFamily: 'monospace',
-    //     fontSize: 24,
-    //     fill: 0x222233,
-    //     align: 'center',
-    //   },
-    // });
-    // okayText.anchor.set(0.5);
-    // okayText.x = GAME_WIDTH / 2;
-    // okayText.y = my + mh - 32;
-    // okayText.eventMode = 'static';
-    // okayText.cursor = 'pointer';
-    // okayText.on('pointerdown', () => {
-    //   // ここでタイトル画面に戻るなど
-    //   this.showTitle();
-    // });
-    // this.gameOverModal.addChild(okayText);
-    //
-    // this.addChild(this.gameOverModal);
   }
 
   override destroy(options?: boolean | import('pixi.js').DestroyOptions) {
