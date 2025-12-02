@@ -125,19 +125,7 @@ async function main() {
     app.stage.addChild(stage);
   }
 
-  function onStageClear(level: number, lives: number) {
-    // ステージクリア時の処理
-    startStage(level + 1, lives);
-  }
-
   showTitle();
 }
 
-// // include the web-font loader script
-// (async () => {
-//   // Add font files to the bundle
-//   PIXI.Assets.addBundle('fonts', [{ alias: 'Osaka', src: '/fonts/Osaka.ttf' }]);
-//   await PIXI.Assets.loadBundle('fonts');
-//   main();
-// })();
 main();

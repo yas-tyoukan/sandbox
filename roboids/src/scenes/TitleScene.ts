@@ -55,8 +55,29 @@ export class TitleScene extends Container {
     this.addChild(logo);
 
     // ゲーム説明
+    const object = new Text({
+      text: `    Object: You must get the power square 
+on each screen by maneuvering past the enemy 
+Roboids. Once you pick up the power square 
+you will be advanced to the next level.`,
+      style: {
+        fontFamily: 'Osaka',
+        fontSize: 9,
+        fill: 0xffffff,
+        align: 'left',
+      },
+    });
+    object.anchor.set(0.5);
+    object.x = boxX + boxWidth / 2;
+    object.y = boxY + 168;
+    this.addChild(object);
+
+    // 操作説明
     const desc = new Text({
-      text: '[   W   ] jump    \n[   A   ] left    \n[   D   ] right    \n[ SPACE ] Teleport',
+      text: `[   W   ] jump
+[   A   ] left
+[   D   ] right
+[ SPACE ] Activate Control Pad.`,
       style: {
         fontFamily: 'monospace',
         fontSize: 12,
@@ -66,7 +87,7 @@ export class TitleScene extends Container {
     });
     desc.anchor.set(0.5);
     desc.x = boxX + boxWidth / 2;
-    desc.y = boxY + 120;
+    desc.y = boxY + 105;
     this.addChild(desc);
 
     // 著作表示
