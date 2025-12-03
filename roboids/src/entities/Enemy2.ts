@@ -50,7 +50,7 @@ export class Enemy2 extends EnemyBase {
     direction: Direction;
     speed?: number;
   }) {
-    const sheet: Spritesheet = await Assets.load('/images/enemy2.json');
+    const sheet: Spritesheet = await Assets.load('./images/enemy2.json');
     const beam = await Beam.create(direction);
     return new Enemy2(sheet, { bound, direction, speed }, beam);
   }

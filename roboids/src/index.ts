@@ -1,6 +1,7 @@
 import { sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
 import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL, LIVES } from '~/constants/gameConfig';
+import { fontsLoad } from '~/utils/fontsLoad';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
 import { Stage2Scene } from '~/scenes/Stage2Scene';
 import { Stage3Scene } from '~/scenes/Stage3Scene';
@@ -124,13 +125,8 @@ async function main() {
     currentScene = stage;
     app.stage.addChild(stage);
   }
-  await document.fonts.ready;
-  console.log(document.fonts.check('48px Osaka'));
-  console.log(document.fonts.check('18px PlaywriteNO'));
-  console.log(document.fonts.check('18px ScienceGothic'));
-  // todo フォント探して設定。awaitするけど、タイムアウトも設定する
-  await document.fonts.load('18px ScienceGothic');
-  console.log(document.fonts.check('18px ScienceGothic'));
+  // フォント読み込み後にタイトル画面表示
+  await fontsLoad(['12px Chicago_Light', '12px CourierPrime-Regular']);
   showTitle();
 }
 

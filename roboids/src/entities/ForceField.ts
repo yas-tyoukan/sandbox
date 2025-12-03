@@ -29,7 +29,7 @@ export class ForceField extends Container {
     this.initialVisible = visible;
   }
   static async create(height: number, id: number, visible = true): Promise<ForceField> {
-    const sheet: Spritesheet = await Assets.load('/images/force-field.json');
+    const sheet: Spritesheet = await Assets.load('./images/force-field.json');
     const frames = Object.keys(sheet.textures)
       .sort()
       .map((name) => sheet.textures[name]);

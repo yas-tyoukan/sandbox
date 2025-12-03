@@ -12,7 +12,7 @@ export class TeleportPad extends Sprite {
 
   // 非同期ファクトリメソッドで生成
   static async create(x: number, y: number, id: number, toId: number): Promise<TeleportPad> {
-    const texture = await Assets.load('/images/teleport-pad.png');
+    const texture = await Assets.load('./images/teleport-pad.png');
     const pad = new TeleportPad(texture, id, toId);
     pad.x = x;
     pad.y = y;

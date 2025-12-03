@@ -95,13 +95,12 @@ export class GameOverModal extends Container {
 
     // 追加
     this.addChild(modalContainer);
-    console.log('cache?', this.cacheAsBitmap, this.parent?.cacheAsBitmap);
   }
 
   // 非同期ファクトリメソッドで生成
   static async create(x: number, y: number, onAfterClose: () => void): Promise<GameOverModal> {
-    const modalTextures = await Assets.load('/images/game-over-modal.png');
-    const okSheet = await Assets.load('/images/ok-button.json');
+    const modalTextures = await Assets.load('./images/game-over-modal.png');
+    const okSheet = await Assets.load('./images/ok-button.json');
 
     const modal = new Sprite(modalTextures);
 

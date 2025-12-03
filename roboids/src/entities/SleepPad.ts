@@ -6,7 +6,7 @@ export class SleepPad extends Sprite {
 
   // 非同期ファクトリメソッドで生成
   static async create(x: number, y: number): Promise<SleepPad> {
-    const texture = await Assets.load('/images/sleep-pad.png');
+    const texture = await Assets.load('./images/sleep-pad.png');
     const pad = new SleepPad(texture);
     pad.x = x;
     pad.y = y;

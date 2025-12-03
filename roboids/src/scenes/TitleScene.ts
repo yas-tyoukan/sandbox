@@ -50,51 +50,70 @@ export class TitleScene extends Container {
     border2.stroke({ width: 0.5, color: 0xffffff });
     this.addChild(border1, border2);
 
-    // タイトルロゴ（Textで仮表示、今後画像に差し替え可）
+    // タイトルロゴ
     const logo = await Logo1.create(178, 66);
     this.addChild(logo);
 
+    // 操作説明
+    const desc1 = new Text({
+      text: `[   W   ]
+[   A   ]
+[   D   ]
+[ SPACE ]`,
+      style: {
+        fontFamily: 'CourierPrime-Regular',
+        fontSize: 12,
+        fill: 0xffffff,
+        align: 'left',
+        lineHeight: 16,
+      },
+    });
+    desc1.anchor.set(0, 0.5);
+    desc1.x = 160;
+    desc1.y = boxY + 105;
+    this.addChild(desc1);
+
+    const desc2 = new Text({
+      text: `Jump
+Left
+Right
+Activate Control Pad.`,
+      style: {
+        fontFamily: 'Chicago_Light',
+        fontSize: 10,
+        fill: 0xffffff,
+        align: 'left',
+        lineHeight: 16.2,
+      },
+    });
+    desc2.anchor.set(0, 0.5);
+    desc2.x = desc1.x + 70;
+    desc2.y = desc1.y + 1;
+    this.addChild(desc2);
+
     // ゲーム説明
-    const object = new Text(
-      `    Object: You must get the power square 
+    const object = new Text({
+      text: `    Object: You must get the power square 
 on each screen by maneuvering past the enemy 
 Roboids. Once you pick up the power square 
 you will be advanced to the next level.`,
-      {
-        fontFamily: 'monospace',
-        fontSize: 9,
+      style: {
+        fontFamily: 'CourierPrime-Regular',
+        fontSize: 8,
         fill: 0xffffff,
         align: 'left',
       },
-    );
+    });
     object.anchor.set(0.5);
     object.x = boxX + boxWidth / 2;
     object.y = boxY + 168;
     this.addChild(object);
 
-    // 操作説明
-    const desc = new Text({
-      text: `[   W   ] jump
-[   A   ] left
-[   D   ] right
-[ SPACE ] Activate Control Pad.`,
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 12,
-        fill: 0xffffff,
-        align: 'left',
-      },
-    });
-    desc.anchor.set(0.5);
-    desc.x = boxX + boxWidth / 2;
-    desc.y = boxY + 105;
-    this.addChild(desc);
-
     // 著作表示
     const credit = new Text({
-      text: '©1991 Glenn Seemann\nPorted and modified by yas-tyoukan.',
+      text: '©1991 Glenn Seemann\nPorted and modified by yas-tyoukan.\n',
       style: {
-        fontFamily: 'Osaka',
+        fontFamily: 'Chicago_Light',
         fontSize: 8,
         fill: 0xffffff,
         align: 'center',
@@ -102,13 +121,13 @@ you will be advanced to the next level.`,
     });
     credit.anchor.set(0.5);
     credit.x = boxX + boxWidth / 2;
-    credit.y = boxY + boxHeight - 14;
+    credit.y = boxY + boxHeight - 12;
     this.addChild(credit);
 
     // Enemy1配置
     const enemyMinY = boxY + 30;
     const enemyMaxY = boxY + boxHeight - 30;
-    const enemySheet: Spritesheet = await Assets.load('/images/enemy1.json');
+    const enemySheet: Spritesheet = await Assets.load('./images/enemy1.json');
     // 左
     this.leftEnemy = await Enemy1.create({ bound: { left: 0, right: 0 }, direction: 0 });
     this.leftEnemy.anchor.set(0.5, 0.5);

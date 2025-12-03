@@ -10,7 +10,7 @@ export class ForceFieldPad extends Sprite {
 
   // 非同期ファクトリメソッドで生成
   static async create(x: number, y: number, targetId: number): Promise<ForceFieldPad> {
-    const texture = await Assets.load('/images/force-field-pad.png');
+    const texture = await Assets.load('./images/force-field-pad.png');
     const pad = new ForceFieldPad(texture, targetId);
     pad.x = x;
     pad.y = y;

@@ -16,7 +16,7 @@ export class TextNumber extends Container {
   }
 
   static async create(x: number, y: number, value: number): Promise<TextNumber> {
-    const texture = (await Assets.load('/images/text-numbers.png')) as Texture;
+    const texture = (await Assets.load('./images/text-numbers.png')) as Texture;
     const digitTextures: Texture[] = [];
     for (let i = 0; i < 10; i++) {
       digitTextures.push(

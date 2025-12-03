@@ -3,7 +3,7 @@ import { AnimatedSprite, Assets, type Spritesheet } from 'pixi.js';
 export class PowerSquare extends AnimatedSprite {
   static async create(x: number, y: number): Promise<PowerSquare> {
     // スプライトシートをロード
-    const sheet: Spritesheet = await Assets.load('/images/power-square.json');
+    const sheet: Spritesheet = await Assets.load('./images/power-square.json');
     const frameNames = Object.keys(sheet.textures);
     const textures = frameNames.map((name) => sheet.textures[name]);
     const anim = new PowerSquare(textures);

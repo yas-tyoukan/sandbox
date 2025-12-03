@@ -5,7 +5,7 @@ const animationSpeed = 0.4; // アニメーション速度
 export class Player extends AnimatedSprite {
   static async create(): Promise<Player> {
     // スプライトシートを読み込む
-    const sheet = await Assets.load('/images/player.json');
+    const sheet = await Assets.load('./images/player.json');
     // フレーム名リストを取得
     const frameNames = Object.keys(sheet.textures).sort(); // フレーム順に並べる
     const textures = frameNames.map((name) => sheet.textures[name]);

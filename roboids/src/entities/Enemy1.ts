@@ -31,7 +31,7 @@ export class Enemy1 extends EnemyBase {
     direction: Direction;
     speed?: number;
   }) {
-    const sheet: Spritesheet = await Assets.load('/images/enemy1.json');
+    const sheet: Spritesheet = await Assets.load('./images/enemy1.json');
     return new Enemy1(sheet, {
       bound: { leftMin, leftMax, left, rightMin, rightMax, right },
       direction,
