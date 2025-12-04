@@ -10,6 +10,7 @@ import { Stage5Scene } from '~/scenes/Stage5Scene';
 import { Stage6Scene } from '~/scenes/Stage6Scene';
 import { Stage7Scene } from '~/scenes/Stage7Scene';
 import { TitleScene } from '~/scenes/TitleScene';
+import { HighScoreModal } from '~/entities/HighScoreModal';
 
 async function main() {
   const app = new PIXI.Application();
@@ -126,8 +127,18 @@ async function main() {
     app.stage.addChild(stage);
   }
   // フォント読み込み後にタイトル画面表示
-  await fontsLoad(['12px Chicago_Light', '12px CourierPrime-Regular']);
+  await fontsLoad(['12px Chicago_Light', '12px Chicago_Bold', '12px CourierPrime-Regular']);
   showTitle();
+
+  // ハイスコア表示
+  document.getElementById('show-high-scores')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    // TODO app.stop()しても音が止まらないし、再開もできない。ステージにストップ機能を入れる
+    const highScoreModal = await HighScoreModal.create(() => {
+      app.stage.removeChild(highScoreModal);
+    });
+    app.stage.addChild(highScoreModal);
+  });
 }
 
 main();
