@@ -11,6 +11,7 @@ import { Stage6Scene } from '~/scenes/Stage6Scene';
 import { Stage7Scene } from '~/scenes/Stage7Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 import { HighScoreModal } from '~/entities/HighScoreModal';
+import { BaseStageScene } from '~/scenes/BaseStageScene';
 
 async function main() {
   const app = new PIXI.Application();
@@ -23,7 +24,7 @@ async function main() {
   });
   document.body.appendChild(app.canvas);
 
-  let currentScene: PIXI.Container | null = null;
+  let currentScene: TitleScene | BaseStageScene | null = null;
 
   function showTitle() {
     if (currentScene) {
@@ -133,9 +134,15 @@ async function main() {
   // ハイスコア表示
   document.getElementById('show-high-scores')?.addEventListener('click', async (e) => {
     e.stopPropagation();
+    if (currentScene instanceof BaseStageScene) {
+      currentScene.pause();
+    }
     // TODO app.stop()しても音が止まらないし、再開もできない。ステージにストップ機能を入れる
     const highScoreModal = await HighScoreModal.create(() => {
       app.stage.removeChild(highScoreModal);
+      if (currentScene instanceof BaseStageScene) {
+        currentScene.resume();
+      }
     });
     app.stage.addChild(highScoreModal);
   });

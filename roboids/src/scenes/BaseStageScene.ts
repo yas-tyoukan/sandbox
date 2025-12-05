@@ -91,9 +91,8 @@ export abstract class BaseStageScene extends Container {
 
   // sleep状態管理
   private asleep = false;
-  private sleepCount = 0;
   private sleepTimer: number | null = null;
-  private isGameOver = false;
+  private isPaused = false;
 
   constructor({
     startStage,
@@ -228,7 +227,7 @@ export abstract class BaseStageScene extends Container {
    * 更新処理
    */
   private update = async () => {
-    if (this.isGameOver) return; // Game Over中は進行停止
+    if (this.isPaused) return;
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
       this.pauseTimer--;
@@ -243,7 +242,7 @@ export abstract class BaseStageScene extends Container {
         if (this.pauseState === 'death') {
           if (this.lives === 0) {
             this.showGameOver();
-            this.isGameOver = true;
+            this.pause();
             return;
           }
           this.restartStage();
@@ -667,5 +666,18 @@ export abstract class BaseStageScene extends Container {
     window.removeEventListener('keyup', this.onKeyUp);
     Ticker.shared.remove(this.update, this);
     super.destroy(options);
+  }
+
+  pause() {
+    this.isPaused = true;
+    if (this.asleep) {
+      // pause時にsleepは解除する。厳密にはスリープ状態を維持したまま一時停止すべきだが、一時停止状態とスリープ状態を両方管理するのが大変なため、一時停止状態を優先する
+      this.stopSleep();
+    }
+    this.stopSpriteAnimation();
+  }
+  resume() {
+    this.isPaused = false;
+    this.playSpriteAnimation();
   }
 }

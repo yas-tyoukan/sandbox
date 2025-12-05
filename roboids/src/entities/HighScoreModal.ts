@@ -15,7 +15,7 @@ const defaultScores: Score[] = [
   { name: 'Mondor', value: 4 },
   { name: 'Gunthor', value: 3 },
   { name: 'Katrina', value: 2 },
-  { name: 'Verryl', value: 2 },
+  { name: 'Verryl日本語あいうエオ書きくけこさしすせそさしすせそさしすせそ', value: 2 },
   { name: 'Evil Overlord', value: 1 },
   { name: 'Sprite', value: 1 },
   { name: 'Slicer', value: 1 },
@@ -37,16 +37,40 @@ export class HighScoreModal extends Container {
     // スコア表示
     const scoreTextStyle = {
       fontFamily: 'Chicago_Bold',
-      fontSize: 8,
+      fontSize: 10,
+      wordWrap: false,
     };
     scores.forEach((score, index) => {
-      const scoreText = new Text({
-        text: `${index + 1}. ${score.name} Level ${score.value}`,
-        style: scoreTextStyle,
+      const y = 62 + index * 12;
+      const numberCol = new Text({
+        text: `${index + 1}.`,
+        style: {
+          ...scoreTextStyle,
+          align: 'right',
+        },
       });
-      scoreText.x = 50;
-      scoreText.y = 40 + index * 8;
-      modalContainer.addChild(scoreText);
+      numberCol.anchor.set(1, 0);
+      numberCol.x = 60;
+      numberCol.y = y;
+      const nameCol = new Text({
+        text: `${score.name}`,
+        style: {
+          ...scoreTextStyle,
+          align: 'left',
+        },
+      });
+      nameCol.x = numberCol.x + 20;
+      nameCol.y = y;
+      const levelCol = new Text({
+        text: `Level ${score.value}`,
+        style: {
+          ...scoreTextStyle,
+          align: 'left',
+        },
+      });
+      levelCol.x = nameCol.x + 120;
+      levelCol.y = y;
+      modalContainer.addChild(numberCol, nameCol, levelCol);
     });
 
     // 追加
@@ -72,8 +96,10 @@ export class HighScoreModal extends Container {
 
     const modal = new Sprite(modalTextures);
     const rawScores = localStorage.getItem(STORAGE_KEY_HIGH_SCORES);
-    const scores: Score[] = rawScores ? JSON.parse(rawScores) : defaultScores;
-
+    const localScores = rawScores ? JSON.parse(rawScores) : null;
+    // ローカル保存されたスコアが10件でなければデフォルトスコアを使う
+    const scores: Score[] =
+      localScores === null || localScores.length !== 10 ? defaultScores : localScores;
     const x = GAME_WIDTH / 2;
     const y = 21;
 
