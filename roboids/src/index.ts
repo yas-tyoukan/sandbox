@@ -44,7 +44,7 @@ async function main() {
     app.stage.addChild(titleScene);
     currentScene = titleScene;
     // ブラウザの制限で、autoPlay:trueにしてもユーザのアクションなしには再生開始されない
-    sound.add('title', { url: 'sounds/title.mp3', autoPlay: true });
+    sound.add('title', { url: './sounds/title.mp3', autoPlay: true });
   }
 
   function calcStagePattern(level: number): [number, number] {

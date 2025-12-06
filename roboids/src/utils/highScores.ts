@@ -16,7 +16,7 @@ const defaultScores: Score[] = [
   { name: 'Verryl', value: 2 },
   { name: 'Evil Overlord', value: 1 },
   { name: 'Sprite', value: 1 },
-  { name: 'Slicer', value: 0 },
+  { name: 'Slicer', value: 1 },
 ];
 
 export function getHighScores() {

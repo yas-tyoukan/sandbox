@@ -1,13 +1,13 @@
 import { sound } from '@pixi/sound';
 
 // 効果音追加
-sound.add('beep', 'sounds/beep.mp3');
-sound.add('beam', 'sounds/death.mp3');
-sound.add('death', 'sounds/death.mp3');
-sound.add('goal', 'sounds/goal.mp3');
-sound.add('jump', 'sounds/jump.mp3');
-sound.add('teleport', 'sounds/teleport.mp3');
-sound.add('force-field', 'sounds/force-field.mp3');
+sound.add('beep', './sounds/beep.mp3');
+sound.add('beam', './sounds/death.mp3');
+sound.add('death', './sounds/death.mp3');
+sound.add('goal', './sounds/goal.mp3');
+sound.add('jump', './sounds/jump.mp3');
+sound.add('teleport', './sounds/teleport.mp3');
+sound.add('force-field', './sounds/force-field.mp3');
 
 // 音声エフェクトの優先度を定義
 const SE_PRIORITY: { [key: string]: number } = {
