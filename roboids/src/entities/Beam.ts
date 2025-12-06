@@ -11,7 +11,7 @@ export class Beam extends Sprite {
    */
   static async create(direction: number): Promise<Beam> {
     await Assets.load('./images/beam.png');
-    const texture = Texture.from('/images/beam.png'); // ビームのテクスチャを取得
+    const texture = Texture.from('./images/beam.png'); // ビームのテクスチャを取得
     const beam = new Beam(texture);
     beam.scale.x = direction; // 右向き: 1, 左向き: -1 で反転
     return beam;
