@@ -7,8 +7,6 @@ import { playSE } from '~/utils/playSE';
 import { Beam } from './Beam';
 import type { Player } from './Player';
 
-sound.add('beam', 'sounds/death.mp3');
-
 const RATE_BEAM = 0.05; // ビーム発射率
 const BEAM_FRAME_COUNT = 19; // ビームのフレーム数
 

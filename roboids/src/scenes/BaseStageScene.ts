@@ -30,6 +30,8 @@ import { TextNumber } from '~/entities/TextNumber';
 import { Logo1 } from '~/entities/Logo1';
 import { Logo2 } from '~/entities/Logo2';
 import { GameOverModal } from '~/entities/GameOverModal';
+import { addHighScore, isInHighScore } from '~/utils/highScores';
+import { HighScoreModal } from '~/entities/HighScoreModal';
 
 export type EnemyArg = {
   type: EnemyType;
@@ -43,12 +45,6 @@ type Platform = { x: number; y: number; width: number; height: number };
 
 type PauseState = 'none' | 'death' | 'clear';
 type Floor = 0 | 1 | 2; // 各段の床番号（0: 最下段, 1: 中段, 2: 最上段）
-
-sound.add('death', 'sounds/death.mp3');
-sound.add('goal', 'sounds/goal.mp3');
-sound.add('jump', 'sounds/jump.mp3');
-sound.add('teleport', 'sounds/teleport.mp3');
-sound.add('force-field', 'sounds/force-field.mp3');
 
 export abstract class BaseStageScene extends Container {
   protected startStage: (level?: number, lives?: number) => void;
@@ -93,6 +89,7 @@ export abstract class BaseStageScene extends Container {
   private asleep = false;
   private sleepTimer: number | null = null;
   private isPaused = false;
+  private isGameOver = false;
 
   constructor({
     startStage,
@@ -227,7 +224,7 @@ export abstract class BaseStageScene extends Container {
    * 更新処理
    */
   private update = async () => {
-    if (this.isPaused) return;
+    if (this.isPaused || this.isGameOver) return;
     // ====== 停止状態の管理 ======
     if (this.pauseState !== 'none') {
       this.pauseTimer--;
@@ -242,7 +239,6 @@ export abstract class BaseStageScene extends Container {
         if (this.pauseState === 'death') {
           if (this.lives === 0) {
             this.showGameOver();
-            this.pause();
             return;
           }
           this.restartStage();
@@ -654,7 +650,29 @@ export abstract class BaseStageScene extends Container {
 
   // Game Overモーダル表示
   private async showGameOver() {
-    this.stopSpriteAnimation();
+    this.pause();
+    this.isGameOver = true;
+    if (isInHighScore(this.level)) {
+      // 効果音を止めないために一定時間待機
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      // ハイスコアにランクインしているならハイスコア入力モーダルを表示
+      const name = prompt(
+        'Congratulations! You received a high score!\n' +
+          'Enter your name for the Hall of Fame List!\n',
+      );
+      sound.stopAll();
+      // 標準のpromptはキャンセル時にnullを返すので、その場合はハイスコア登録をスキップ
+      if (name !== null) {
+        addHighScore(name, this.level);
+      }
+      const highScoreModal = await HighScoreModal.create(() => {
+        this.removeChild(highScoreModal);
+        this.startStage();
+      });
+      this.addChild(highScoreModal);
+      return;
+    }
+    // ハイスコアにランクインしていないならゲームオーバーモーダルを表示
     const gameOverModal = await GameOverModal.create(GAME_WIDTH / 2, 54, () => {
       this.startStage();
     });

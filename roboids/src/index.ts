@@ -1,6 +1,12 @@
 import { sound } from '@pixi/sound';
 import * as PIXI from 'pixi.js';
-import { GAME_HEIGHT, GAME_WIDTH, START_LEVEL, LIVES } from '~/constants/gameConfig';
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  START_LEVEL,
+  LIVES,
+  STORAGE_KEY_HIGH_SCORES,
+} from '~/constants/gameConfig';
 import { fontsLoad } from '~/utils/fontsLoad';
 import { Stage1Scene } from '~/scenes/Stage1Scene';
 import { Stage2Scene } from '~/scenes/Stage2Scene';
@@ -12,6 +18,9 @@ import { Stage7Scene } from '~/scenes/Stage7Scene';
 import { TitleScene } from '~/scenes/TitleScene';
 import { HighScoreModal } from '~/entities/HighScoreModal';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
+import { playSE } from '~/utils/playSE';
+
+let currentHighScoreModal: HighScoreModal | null = null;
 
 async function main() {
   const app = new PIXI.Application();
@@ -134,17 +143,45 @@ async function main() {
   // ハイスコア表示
   document.getElementById('show-high-scores')?.addEventListener('click', async (e) => {
     e.stopPropagation();
+    if (currentHighScoreModal) {
+      currentHighScoreModal.destroy();
+      return;
+    }
     if (currentScene instanceof BaseStageScene) {
       currentScene.pause();
     }
-    // TODO app.stop()しても音が止まらないし、再開もできない。ステージにストップ機能を入れる
     const highScoreModal = await HighScoreModal.create(() => {
       app.stage.removeChild(highScoreModal);
+      currentHighScoreModal = null;
       if (currentScene instanceof BaseStageScene) {
         currentScene.resume();
       }
     });
+    currentHighScoreModal = highScoreModal;
     app.stage.addChild(highScoreModal);
+  });
+
+  // ハイスコア削除
+  document.getElementById('clear-high-scores')?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (currentHighScoreModal) {
+      currentHighScoreModal.destroy();
+      return;
+    }
+    if (currentScene instanceof BaseStageScene) {
+      currentScene.pause();
+    }
+    playSE('beep');
+    await new Promise((r) => setTimeout(r, 500));
+    const answer = confirm('Are you sure you want to clear the high scores?');
+    sound.stopAll();
+    sound.resumeAll();
+    if (answer) {
+      localStorage.removeItem(STORAGE_KEY_HIGH_SCORES);
+    }
+    if (currentScene instanceof BaseStageScene) {
+      currentScene.resume();
+    }
   });
 }
 

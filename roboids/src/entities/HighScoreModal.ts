@@ -1,25 +1,7 @@
-import { Assets, Container, Sprite, Text } from 'pixi.js';
+import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 // @ts-ignore
-import { Button } from '@pixi/ui';
-import { GAME_WIDTH, STORAGE_KEY_HIGH_SCORES } from '~/constants/gameConfig';
-
-type Score = {
-  name: string;
-  value: number;
-};
-
-const defaultScores: Score[] = [
-  { name: 'Bob', value: 7 },
-  { name: 'Chuck', value: 5 },
-  { name: 'Cork', value: 4 },
-  { name: 'Mondor', value: 4 },
-  { name: 'Gunthor', value: 3 },
-  { name: 'Katrina', value: 2 },
-  { name: 'Verryl日本語あいうエオ書きくけこさしすせそさしすせそさしすせそ', value: 2 },
-  { name: 'Evil Overlord', value: 1 },
-  { name: 'Sprite', value: 1 },
-  { name: 'Slicer', value: 1 },
-];
+import { GAME_WIDTH } from '~/constants/gameConfig';
+import { type Score, getHighScores } from '~/utils/highScores';
 
 export class HighScoreModal extends Container {
   constructor(x: number, y: number, ms: Sprite, scores: Score[], onAfterClose: () => void) {
@@ -40,6 +22,7 @@ export class HighScoreModal extends Container {
       fontSize: 10,
       wordWrap: false,
     };
+
     scores.forEach((score, index) => {
       const y = 62 + index * 12;
       const numberCol = new Text({
@@ -57,10 +40,15 @@ export class HighScoreModal extends Container {
         style: {
           ...scoreTextStyle,
           align: 'left',
+          wordWrap: false,
         },
       });
-      nameCol.x = numberCol.x + 20;
+      nameCol.x = numberCol.x + 11;
       nameCol.y = y;
+      const nameTextMask = new Graphics()
+        .rect(nameCol.x, nameCol.y, 130, nameCol.height * 2)
+        .fill(0xffffff);
+      nameCol.mask = nameTextMask;
       const levelCol = new Text({
         text: `Level ${score.value}`,
         style: {
@@ -68,9 +56,9 @@ export class HighScoreModal extends Container {
           align: 'left',
         },
       });
-      levelCol.x = nameCol.x + 120;
+      levelCol.x = nameCol.x + 132;
       levelCol.y = y;
-      modalContainer.addChild(numberCol, nameCol, levelCol);
+      modalContainer.addChild(numberCol, nameCol, nameTextMask, levelCol);
     });
 
     // 追加
@@ -95,11 +83,7 @@ export class HighScoreModal extends Container {
     const modalTextures = await Assets.load('./images/highscore.png');
 
     const modal = new Sprite(modalTextures);
-    const rawScores = localStorage.getItem(STORAGE_KEY_HIGH_SCORES);
-    const localScores = rawScores ? JSON.parse(rawScores) : null;
-    // ローカル保存されたスコアが10件でなければデフォルトスコアを使う
-    const scores: Score[] =
-      localScores === null || localScores.length !== 10 ? defaultScores : localScores;
+    const scores = getHighScores();
     const x = GAME_WIDTH / 2;
     const y = 21;
 
