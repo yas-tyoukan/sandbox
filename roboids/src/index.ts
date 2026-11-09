@@ -19,6 +19,7 @@ import { TitleScene } from '~/scenes/TitleScene';
 import { HighScoreModal } from '~/entities/HighScoreModal';
 import { BaseStageScene } from '~/scenes/BaseStageScene';
 import { playSE } from '~/utils/playSE';
+import { setupTouchControls } from '~/utils/touchControls';
 
 let currentHighScoreModal: HighScoreModal | null = null;
 
@@ -32,6 +33,7 @@ async function main() {
     autoDensity: true,
   });
   document.body.appendChild(app.canvas);
+  setupTouchControls();
 
   let currentScene: TitleScene | BaseStageScene | null = null;
 

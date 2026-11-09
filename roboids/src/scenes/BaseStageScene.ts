@@ -1,5 +1,5 @@
 import { sound } from '@pixi/sound';
-import { Container, Graphics, Text, Ticker } from 'pixi.js';
+import { Container, Graphics, Ticker } from 'pixi.js';
 import {
   FLOOR_HEIGHT,
   GAME_HEIGHT,
@@ -9,7 +9,6 @@ import {
   JUMP_VELOCITY,
   JUMP_VELOCITY_MAX,
   SLEEP_TIME,
-  START_LEVEL,
 } from '~/constants/gameConfig';
 import { Enemy1 } from '~/entities/Enemy1';
 import { Enemy2 } from '~/entities/Enemy2';
@@ -24,10 +23,11 @@ import { SleepPad } from '~/entities/SleepPad';
 import { TeleportPad } from '~/entities/TeleportPad';
 import type { Bound, Direction, EnemyType } from '~/types';
 import { playSE } from '~/utils/playSE';
+import { subscribeTouchKeys } from '~/utils/touchControls';
 import { TextLevel } from '~/entities/TextLevel';
 import { TextRobots } from '~/entities/TextRobots';
 import { TextNumber } from '~/entities/TextNumber';
-import { Logo1 } from '~/entities/Logo1';
+// import { Logo1 } from '~/entities/Logo1';
 import { Logo2 } from '~/entities/Logo2';
 import { GameOverModal } from '~/entities/GameOverModal';
 import { addHighScore, isInHighScore } from '~/utils/highScores';
@@ -68,6 +68,7 @@ export abstract class BaseStageScene extends Container {
   // キー入力管理
   protected keys: Record<string, boolean> = {};
   protected prevKeys: Record<string, boolean> = {};
+  private unsubscribeTouch: () => void;
 
   // 停止状態管理
   private pauseState: PauseState = 'none';
@@ -111,6 +112,10 @@ export abstract class BaseStageScene extends Container {
     this.showTitle = showTitle;
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
+    // タッチパネルの入力をキー入力として扱う
+    this.unsubscribeTouch = subscribeTouchKeys((code, pressed) => {
+      this.keys[code] = pressed;
+    });
     this.createStageBase();
     Promise.all([this.initStage(pattern), this.initPlayer(), this.initGoal()]).then(() => {
       Ticker.shared.add(this.update, this);
@@ -682,6 +687,7 @@ export abstract class BaseStageScene extends Container {
   override destroy(options?: boolean | import('pixi.js').DestroyOptions) {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
+    this.unsubscribeTouch();
     Ticker.shared.remove(this.update, this);
     super.destroy(options);
   }
